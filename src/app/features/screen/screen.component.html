@@ -1,0 +1,147 @@
+<!-- Toast para mensajes -->
+<p-toast></p-toast>
+
+<!-- Pantalla no emparejada -->
+<div class="screen-container" *ngIf="!isPaired">
+  <div class="pairing-content">
+    
+    <div class="brand-section">
+      <i class="pi pi-microphone brand-icon"></i>
+      <h1 class="brand-title">KaraQR</h1>
+      <p class="brand-subtitle">Sistema de Cola para Karaoke</p>
+    </div>
+
+    <p-card class="pairing-card">
+      <div class="card-content">
+        <h2 class="pairing-title">Ingresa tu código de pantalla</h2>
+        
+        <div class="input-section">
+          <label for="tenantCode" class="input-label">Código de Pantalla</label>
+          <input 
+            pInputText 
+            id="tenantCode"
+            [(ngModel)]="tenantCode"
+            placeholder="Ej: SALA001"
+            class="tenant-input"
+            [class.input-error]="hasError"
+            [disabled]="isLoading"
+            (keyup.enter)="onEnterKey()"
+            (input)="clearError()"
+            maxlength="20"
+            autocomplete="off">
+          
+          <small class="input-help" [class.help-error]="hasError">
+            <i class="pi pi-info-circle" *ngIf="!hasError"></i>
+            <i class="pi pi-exclamation-triangle" *ngIf="hasError"></i>
+            <span *ngIf="!hasError">Este código lo ves en tu panel /admin</span>
+            <span *ngIf="hasError">{{ errorMessage }}</span>
+          </small>
+        </div>
+
+        <div class="checkbox-section">
+          <p-checkbox 
+            [(ngModel)]="rememberDevice" 
+            [binary]="true"
+            inputId="remember-checkbox"
+            class="remember-checkbox">
+          </p-checkbox>
+          <label for="remember-checkbox" class="checkbox-label">
+            <i class="pi pi-tv"></i>
+            Recordar en este televisor
+          </label>
+        </div>
+
+        <div class="button-section">
+          <p-button 
+            label="Emparejar"
+            icon="pi pi-link"
+            severity="success"
+            size="large"
+            class="confirm-button"
+            [loading]="isLoading"
+            [disabled]="!tenantCode.trim()"
+            (onClick)="confirmTenantCode()">
+          </p-button>
+        </div>
+      </div>
+    </p-card>
+
+    <div class="help-section">
+      <div class="help-item">
+        <i class="pi pi-desktop"></i>
+        <span>Optimizado para TV y pantallas grandes</span>
+      </div>
+      <div class="help-item">
+        <i class="pi pi-shield"></i>
+        <span>Conexión segura con tu cuenta KaraQR</span>
+      </div>
+      <div class="help-item">
+        <i class="pi pi-wifi"></i>
+        <span>Se conecta automáticamente la próxima vez</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Pantalla emparejada -->
+<div class="paired-screen" *ngIf="isPaired">
+  
+  <!-- Header minimal -->
+  <header class="paired-header">
+    <div class="header-left">
+      <i class="pi pi-microphone logo-icon"></i>
+      <span class="logo-text">KaraQR</span>
+      <p-tag 
+        [value]="pairedTenantId" 
+        severity="success"
+        class="tenant-tag">
+      </p-tag>
+    </div>
+    
+    <div class="header-right">
+      <span class="current-time">{{ now | date:'shortTime' }}</span>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="paired-main">
+    <div class="success-content">
+      <div class="success-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      
+      <h2 class="success-title">¡TV Configurado!</h2>
+      <p class="success-message">
+        Televisor emparejado con <strong>{{ pairedTenantId }}</strong>
+      </p>
+      
+      <div class="action-buttons">
+        <p-button 
+          label="Pantalla Completa"
+          icon="pi pi-window-maximize"
+          severity="info"
+          size="large"
+          class="action-btn"
+          (onClick)="goFullscreen()">
+        </p-button>
+        
+        <p-button 
+          label="Cambiar Código"
+          icon="pi pi-cog"
+          severity="secondary"
+          size="large"
+          [outlined]="true"
+          class="action-btn"
+          (onClick)="clearPairing()">
+        </p-button>
+      </div>
+
+      <div class="auto-redirect">
+        <i class="pi pi-clock"></i>
+        <span>Redirigiendo automáticamente a la cola...</span>
+      </div>
+    </div>
+  </main>
+
+</div>

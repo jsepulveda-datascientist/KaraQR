@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  baseUrl: 'https://karaqr.pages.dev',
   apiBase: 'https://sphllmtaepeeiozqljsb.supabase.co',
   defaultTenant: 'demo-venue',
   supabaseUrl: 'https://sphllmtaepeeiozqljsb.supabase.co',

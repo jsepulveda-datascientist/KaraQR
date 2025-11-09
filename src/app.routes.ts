@@ -33,6 +33,11 @@ export const appRoutes: Routes = [
                 loadChildren: () => import('./app/apps/apps.routes')
             },
             {
+                path: 'tenant-management',
+                data: { breadcrumb: 'Gestión de Tenants' },
+                loadComponent: () => import('@/features/tenant-management/tenant-management.component').then((c) => c.TenantManagementComponent)
+            },
+            {
                 path: 'ecommerce',
                 data: { breadcrumb: 'E-Commerce' },
                 loadChildren: () => import('@/pages/ecommerce/ecommerce.routes')
@@ -65,6 +70,10 @@ export const appRoutes: Routes = [
     {
         path: 'admin',
         loadComponent: () => import('@/features/admin/admin.component').then((c) => c.AdminComponent)
+    },
+    {
+        path: 'screen',
+        loadComponent: () => import('@/features/screen/screen.component').then((c) => c.ScreenComponent)
     },
     {
         path: 'notfound',

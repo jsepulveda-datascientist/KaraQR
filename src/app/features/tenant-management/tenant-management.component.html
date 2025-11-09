@@ -1,0 +1,477 @@
+<div class="tenant-management">
+  <!-- Header con toolbar -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <h2><i class="pi pi-users"></i> Gestión de Tenants</h2>
+        <p>Administra los tenants del sistema KaraQR</p>
+      </div>
+    </ng-template>
+
+    <!-- Toolbar de acciones -->
+    <p-toolbar class="mb-4">
+      <ng-template pTemplate="left">
+        <p-button 
+          label="Nuevo Tenant" 
+          icon="pi pi-plus" 
+          class="p-button-success mr-2"
+          (onClick)="openCreateDialog()">
+        </p-button>
+        
+        <p-button 
+          label="Actualizar" 
+          icon="pi pi-refresh" 
+          class="p-button-info mr-2"
+          [loading]="isLoading"
+          (onClick)="refresh()">
+        </p-button>
+        
+        <p-button 
+          label="Test DB" 
+          icon="pi pi-cog" 
+          class="p-button-secondary"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="testDatabasePermissions()">
+        </p-button>
+      </ng-template>
+
+      <ng-template pTemplate="right">
+        <span class="tenant-count">
+          <i class="pi pi-info-circle"></i>
+          Total: {{ tenants.length }} tenants
+        </span>
+      </ng-template>
+    </p-toolbar>
+
+    <!-- Tabla de tenants -->
+    <p-table 
+      [value]="tenants" 
+      [loading]="isLoading"
+      [paginator]="true" 
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} tenants"
+      [rowsPerPageOptions]="[5, 10, 25, 50]"
+      styleClass="p-datatable-gridlines"
+      responsiveLayout="scroll">
+      
+      <!-- Columna ID -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="min-width: 120px;">
+            <div class="flex align-items-center">
+              <span>ID Tenant</span>
+            </div>
+          </th>
+          <th style="min-width: 150px;">Nombre</th>
+          <th style="min-width: 120px;">Colores</th>
+          <th style="min-width: 80px;">Total</th>
+          <th style="min-width: 80px;">Activas</th>
+          <th style="min-width: 150px;">Creado</th>
+          <th style="min-width: 120px;">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-tenant>
+        <tr>
+          <!-- ID Tenant -->
+          <td>
+            <span class="tenant-id">{{ tenant.id }}</span>
+          </td>
+
+          <!-- Nombre -->
+          <td>
+            <strong>{{ tenant.display_name }}</strong>
+          </td>
+
+          <!-- Colores -->
+          <td>
+            <div class="color-preview-row">
+              <div class="color-box-small" [style.background]="tenant.primary_hex" [title]="tenant.primary_hex"></div>
+              <div class="color-box-small" [style.background]="tenant.accent_hex" [title]="tenant.accent_hex"></div>
+            </div>
+          </td>
+
+          <!-- Total Entradas -->
+          <td class="text-center">
+            <p-badge 
+              [value]="tenant.stats?.total_entries || 0" 
+              severity="info">
+            </p-badge>
+          </td>
+
+          <!-- Entradas Activas -->
+          <td class="text-center">
+            <p-badge 
+              [value]="tenant.stats?.active_entries || 0" 
+              [severity]="(tenant.stats?.active_entries || 0) > 0 ? 'warn' : 'secondary'">
+            </p-badge>
+          </td>
+
+          <!-- Fecha Creación -->
+          <td>
+            <small>{{ formatDate(tenant.created_at) }}</small>
+          </td>
+
+          <!-- Acciones -->
+          <td>
+            <div class="action-buttons">
+              <p-button 
+                icon="pi pi-eye"
+                class="p-button-info p-button-sm p-button-outlined mr-1"
+                pTooltip="Ver detalles"
+                (onClick)="viewTenant(tenant)">
+              </p-button>
+              
+              <p-button 
+                icon="pi pi-pencil"
+                class="p-button-warning p-button-sm p-button-outlined mr-1"
+                pTooltip="Editar"
+                (onClick)="openEditDialog(tenant)">
+              </p-button>
+              
+              <p-button 
+                icon="pi pi-trash"
+                class="p-button-danger p-button-sm p-button-outlined"
+                pTooltip="Eliminar"
+                (onClick)="confirmDelete(tenant)">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty state -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="text-center py-4">
+            <div class="empty-state">
+              <i class="pi pi-users empty-icon"></i>
+              <h4>No hay tenants registrados</h4>
+              <p>Crea el primer tenant para comenzar</p>
+              <p-button 
+                label="Crear Tenant" 
+                icon="pi pi-plus"
+                class="p-button-success"
+                (onClick)="openCreateDialog()">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- Toast para notificaciones -->
+  <p-toast></p-toast>
+
+  <!-- Dialog de confirmación -->
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Dialog Crear Tenant -->
+  <p-dialog 
+    [(visible)]="showCreateDialog" 
+    [modal]="true" 
+    header="Crear Nuevo Tenant"
+    [style]="{ width: '600px' }"
+    [closable]="true"
+    [closeOnEscape]="false">
+    
+    <div class="create-form">
+      <div class="field">
+        <label for="create-id">ID del Tenant *</label>
+        <input 
+          pInputText 
+          id="create-id"
+          [(ngModel)]="createForm.id"
+          placeholder="Ej: SALA001, BAR_CENTRAL"
+          class="w-full"
+          maxlength="20"
+          [style]="{ 'text-transform': 'uppercase' }">
+        <small class="form-help">Solo letras, números, guiones y guiones bajos</small>
+      </div>
+
+      <div class="field">
+        <label for="create-name">Nombre *</label>
+        <input 
+          pInputText 
+          id="create-name"
+          [(ngModel)]="createForm.display_name"
+          placeholder="Nombre descriptivo del tenant"
+          class="w-full"
+          maxlength="100">
+      </div>
+
+      <div class="field-group">
+        <div class="field">
+          <label for="create-primary">Color Principal</label>
+          <input 
+            type="color"
+            id="create-primary"
+            [(ngModel)]="createForm.primary_hex"
+            class="w-full color-input">
+          <input 
+            pInputText
+            [(ngModel)]="createForm.primary_hex"
+            placeholder="#00B8FF"
+            class="w-full mt-1"
+            maxlength="7">
+        </div>
+
+        <div class="field">
+          <label for="create-accent">Color Acento</label>
+          <input 
+            type="color"
+            id="create-accent"
+            [(ngModel)]="createForm.accent_hex"
+            class="w-full color-input">
+          <input 
+            pInputText
+            [(ngModel)]="createForm.accent_hex"
+            placeholder="#FF3FA4"
+            class="w-full mt-1"
+            maxlength="7">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="create-logo">URL del Logo (opcional)</label>
+        <input 
+          pInputText 
+          id="create-logo"
+          [(ngModel)]="createForm.logo_url"
+          placeholder="https://ejemplo.com/logo.png"
+          class="w-full">
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <p-button 
+        label="Cancelar" 
+        icon="pi pi-times" 
+        class="p-button-text"
+        (onClick)="showCreateDialog = false">
+      </p-button>
+      
+      <p-button 
+        label="Crear" 
+        icon="pi pi-check" 
+        class="p-button-success"
+        [loading]="isLoading"
+        (onClick)="createTenant()">
+      </p-button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog Editar Tenant -->
+  <p-dialog 
+    [(visible)]="showEditDialog" 
+    [modal]="true" 
+    header="Editar Tenant"
+    [style]="{ width: '600px' }"
+    [closable]="true"
+    [closeOnEscape]="false">
+    
+    <div class="edit-form" *ngIf="selectedTenant">
+      <div class="field">
+        <label>ID del Tenant</label>
+        <input 
+          pInputText 
+          [value]="selectedTenant.id"
+          disabled
+          class="w-full">
+        <small class="form-help">El ID no se puede modificar</small>
+      </div>
+
+      <div class="field">
+        <label for="edit-name">Nombre *</label>
+        <input 
+          pInputText 
+          id="edit-name"
+          [(ngModel)]="editForm.display_name"
+          placeholder="Nombre descriptivo del tenant"
+          class="w-full"
+          maxlength="100">
+      </div>
+
+      <div class="field-group">
+        <div class="field">
+          <label for="edit-primary">Color Principal</label>
+          <input 
+            type="color"
+            id="edit-primary"
+            [(ngModel)]="editForm.primary_hex"
+            class="w-full color-input">
+          <input 
+            pInputText
+            [(ngModel)]="editForm.primary_hex"
+            placeholder="#00B8FF"
+            class="w-full mt-1"
+            maxlength="7">
+        </div>
+
+        <div class="field">
+          <label for="edit-accent">Color Acento</label>
+          <input 
+            type="color"
+            id="edit-accent"
+            [(ngModel)]="editForm.accent_hex"
+            class="w-full color-input">
+          <input 
+            pInputText
+            [(ngModel)]="editForm.accent_hex"
+            placeholder="#FF3FA4"
+            class="w-full mt-1"
+            maxlength="7">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="edit-logo">URL del Logo (opcional)</label>
+        <input 
+          pInputText 
+          id="edit-logo"
+          [(ngModel)]="editForm.logo_url"
+          placeholder="https://ejemplo.com/logo.png"
+          class="w-full">
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <p-button 
+        label="Cancelar" 
+        icon="pi pi-times" 
+        class="p-button-text"
+        (onClick)="showEditDialog = false">
+      </p-button>
+      
+      <p-button 
+        label="Guardar" 
+        icon="pi pi-check" 
+        class="p-button-warning"
+        [loading]="isLoading"
+        (onClick)="updateTenant()">
+      </p-button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog Ver Detalles -->
+  <p-dialog 
+    [(visible)]="showViewDialog" 
+    [modal]="true" 
+    header="Detalles del Tenant"
+    [style]="{ width: '700px' }"
+    [closable]="true">
+    
+    <div class="tenant-details" *ngIf="selectedTenant">
+      <!-- Información básica -->
+      <div class="detail-section">
+        <h4><i class="pi pi-info-circle"></i> Información Básica</h4>
+        
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>ID:</label>
+            <span class="tenant-id">{{ selectedTenant.id }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <label>Nombre:</label>
+            <span>{{ selectedTenant.display_name }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <label>Colores:</label>
+            <div class="color-preview-detail">
+              <div class="color-item">
+                <div class="color-box-large" [style.background]="selectedTenant.primary_hex"></div>
+                <span>{{ selectedTenant.primary_hex }}</span>
+                <small>Principal</small>
+              </div>
+              <div class="color-item">
+                <div class="color-box-large" [style.background]="selectedTenant.accent_hex"></div>
+                <span>{{ selectedTenant.accent_hex }}</span>
+                <small>Acento</small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="detail-item" *ngIf="selectedTenant.logo_url">
+            <label>Logo:</label>
+            <img [src]="selectedTenant.logo_url" alt="Logo" class="tenant-logo" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="detail-section" *ngIf="selectedTenant.stats">
+        <h4><i class="pi pi-chart-bar"></i> Estadísticas</h4>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon total">
+              <i class="pi pi-list"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ selectedTenant.stats.total_entries }}</span>
+              <span class="stat-label">Total Entradas</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon active">
+              <i class="pi pi-play"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ selectedTenant.stats.active_entries }}</span>
+              <span class="stat-label">Activas</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon completed">
+              <i class="pi pi-check"></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ selectedTenant.stats.completed_today }}</span>
+              <span class="stat-label">Completadas Hoy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fechas -->
+      <div class="detail-section">
+        <h4><i class="pi pi-calendar"></i> Información Temporal</h4>
+        
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Creado:</label>
+            <span>{{ formatDate(selectedTenant.created_at) }}</span>
+          </div>
+          
+          <div class="detail-item" *ngIf="selectedTenant.stats">
+            <label>Última Actividad:</label>
+            <span>{{ formatDate(selectedTenant.stats.last_activity) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <p-button 
+        label="Cerrar" 
+        icon="pi pi-times" 
+        class="p-button-text"
+        (onClick)="showViewDialog = false">
+      </p-button>
+      
+      <p-button 
+        label="Editar" 
+        icon="pi pi-pencil" 
+        class="p-button-warning"
+        (onClick)="showViewDialog = false; openEditDialog(selectedTenant!)">
+      </p-button>
+    </ng-template>
+  </p-dialog>
+</div>

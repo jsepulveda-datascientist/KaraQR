@@ -22,6 +22,33 @@ export class AppMenu {
 
     model: MenuItem[] = [
         {
+            label: 'KaraQR',
+            icon: 'pi pi-fw pi-microphone',
+            items: [
+                {
+                    label: 'Pantalla de TV',
+                    icon: 'pi pi-fw pi-desktop',
+                    routerLink: ['/screen']
+                },
+                {
+                    label: 'Cola de Karaoke',
+                    icon: 'pi pi-fw pi-list',
+                    routerLink: ['/queue']
+                },
+                {
+                    label: 'Panel de Admin',
+                    icon: 'pi pi-fw pi-cog',
+                    routerLink: ['/admin']
+                },
+                {
+                    label: 'Gestión de Tenants',
+                    icon: 'pi pi-fw pi-users',
+                    routerLink: ['/tenant-management']
+                },
+                { separator: true }
+            ]
+        },
+        {
             label: 'Pages',
             icon: 'pi pi-fw pi-briefcase',
             items: [

@@ -1,0 +1,223 @@
+/* Estilos principales */
+.tenant-management .card-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tenant-management .card-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.tenant-management .tenant-count {
+  color: #6b7280;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tenant-management .tenant-id {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  color: #1f2937;
+}
+
+.tenant-management .action-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tenant-management .text-truncate {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Estados vacíos */
+.tenant-management .empty-state {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.tenant-management .empty-state .empty-icon {
+  font-size: 3rem;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+}
+
+.tenant-management .empty-state h4 {
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.tenant-management .empty-state p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+/* Formularios */
+.tenant-management .create-form .field,
+.tenant-management .edit-form .field {
+  margin-bottom: 1.5rem;
+}
+
+.tenant-management .create-form .field label,
+.tenant-management .edit-form .field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.tenant-management .create-form .field .form-help,
+.tenant-management .edit-form .field .form-help {
+  display: block;
+  margin-top: 0.25rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.tenant-management .create-form .field-group,
+.tenant-management .edit-form .field-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tenant-management .create-form .checkbox-field .checkbox-label,
+.tenant-management .edit-form .checkbox-field .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.tenant-management .create-form .checkbox-field .checkbox-label input[type="checkbox"],
+.tenant-management .edit-form .checkbox-field .checkbox-label input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.tenant-management .settings-title {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+/* Detalles del tenant */
+.tenant-management .tenant-details .detail-section {
+  margin-bottom: 2rem;
+}
+
+.tenant-management .tenant-details .detail-section h4 {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tenant-management .tenant-details .detail-section .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.tenant-management .tenant-details .detail-section .detail-item label {
+  display: block;
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.tenant-management .tenant-details .detail-section .detail-item span {
+  color: #1f2937;
+}
+
+.tenant-management .tenant-details .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.tenant-management .tenant-details .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+}
+
+.tenant-management .tenant-details .stat-card .stat-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.125rem;
+}
+
+.tenant-management .tenant-details .stat-card .stat-icon.total {
+  background: #3b82f6;
+}
+
+.tenant-management .tenant-details .stat-card .stat-icon.active {
+  background: #f59e0b;
+}
+
+.tenant-management .tenant-details .stat-card .stat-icon.completed {
+  background: #10b981;
+}
+
+.tenant-management .tenant-details .stat-card .stat-content .stat-number {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.tenant-management .tenant-details .stat-card .stat-content .stat-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tenant-management .field-group {
+    grid-template-columns: 1fr !important;
+  }
+
+  .tenant-management .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .tenant-management .detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .tenant-management .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

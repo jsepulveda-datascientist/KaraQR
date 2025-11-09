@@ -15,7 +15,10 @@ import { QRCodeComponent } from 'angularx-qrcode';
 
 // Services
 import { QueueService } from '../../core/services/queue.service';
+import { TenantService } from '../../core/services/tenant.service';
+import { UrlService } from '../../core/services/url.service';
 import { QueueEntry } from '../../core/interfaces';
+import { Tenant } from '../../core/models/tenant.model';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -52,81 +55,87 @@ import { environment } from '../../../environments/environment';
       <!-- Contenido Principal -->
       <main class="queue-main" *ngIf="hasEntries(); else noEntries">
         
-        <!-- Cantante Actual -->
-        <section class="current-performer" *ngIf="current() as currentSinger">
-          <div class="section-title">
-            <i class="pi pi-play-circle"></i>
-            <span>Ahora en escena</span>
-          </div>
+        <!-- Layout Horizontal para TV / Desktop -->
+        <div class="performers-horizontal-layout">
           
-          <div class="performer-card">
-            <div class="performer-info">
-              <h2 class="performer-name">{{ currentSinger.name }}</h2>
-              <div class="song-info">
-                <div class="song-details" *ngIf="parseTitle(currentSinger.title_raw || currentSinger.song) as song">
-                  <span class="artist" *ngIf="song.artist">{{ song.artist }}</span>
-                  <span class="separator" *ngIf="song.artist"> - </span>
-                  <span class="title">{{ song.title }}</span>
-                </div>
-                <p-tag 
-                  [value]="getStatusText(currentSinger.status)" 
-                  [severity]="severity(currentSinger.status)"
-                  class="status-tag">
-                </p-tag>
-              </div>
+          <!-- Cantante Actual -->
+          <section class="current-performer-section" *ngIf="current() as currentSinger">
+            <div class="section-title">
+              <i class="pi pi-play-circle"></i>
+              <span>Ahora en escena</span>
             </div>
             
-            <!-- YouTube Button -->
-            <div class="youtube-section" *ngIf="currentSinger.youtube_url || currentSinger.youtubeLink">
-              <p-button 
-                icon="pi pi-youtube"
-                label="Ver en YouTube"
-                severity="help"
-                size="large"
-                class="youtube-btn"
-                (click)="openYouTube(currentSinger.youtube_url || currentSinger.youtubeLink || '')"
-                [outlined]="true">
-              </p-button>
-            </div>
-          </div>
-        </section>
-
-        <p-divider></p-divider>
-
-        <!-- Próximos Cantantes -->
-        <section class="next-performers" *ngIf="next() as nextSingers">
-          <div class="section-title">
-            <i class="pi pi-forward"></i>
-            <span>Siguen</span>
-          </div>
-          
-          <div class="performers-list" *ngIf="nextSingers.length > 0; else noNext">
-            <div 
-              class="performer-item" 
-              *ngFor="let performer of nextSingers; let i = index"
-            >
-              <div class="position-number">{{ i + 1 }}</div>
-              <div class="performer-details">
-                <span class="name">{{ performer.name }}</span>
-                <div class="song" *ngIf="parseTitle(performer.title_raw || performer.song) as song">
-                  <span class="artist" *ngIf="song.artist">{{ song.artist }}</span>
-                  <span class="separator" *ngIf="song.artist"> - </span>
-                  <span class="title">{{ song.title }}</span>
+            <div class="performer-card">
+              <div class="performer-info">
+                <h2 class="performer-name">{{ currentSinger.name }}</h2>
+                <div class="song-info">
+                  <div class="song-details" *ngIf="parseTitle(currentSinger.title_raw || currentSinger.song) as song">
+                    <span class="artist" *ngIf="song.artist">{{ song.artist }}</span>
+                    <span class="separator" *ngIf="song.artist"> - </span>
+                    <span class="title">{{ song.title }}</span>
+                  </div>
+                  <p-tag 
+                    [value]="getStatusText(currentSinger.status)" 
+                    [severity]="severity(currentSinger.status)"
+                    class="status-tag">
+                  </p-tag>
                 </div>
               </div>
-              <div class="youtube-indicator" *ngIf="performer.youtube_url || performer.youtubeLink">
-                <i class="pi pi-youtube youtube-icon"></i>
+              
+              <!-- YouTube Button -->
+              <div class="youtube-section" *ngIf="currentSinger.youtube_url || currentSinger.youtubeLink">
+                <p-button 
+                  icon="pi pi-youtube"
+                  label="YouTube"
+                  severity="help"
+                  size="large"
+                  class="youtube-btn"
+                  (click)="openYouTube(currentSinger.youtube_url || currentSinger.youtubeLink || '')"
+                  [outlined]="true">
+                </p-button>
               </div>
             </div>
-          </div>
+          </section>
 
-          <ng-template #noNext>
-            <div class="empty-message">
-              <i class="pi pi-users"></i>
-              <p>No hay más cantantes en espera</p>
+          <!-- Divisor Vertical -->
+          <div class="vertical-divider"></div>
+
+          <!-- Próximos Cantantes -->
+          <section class="next-performers-section" *ngIf="next() as nextSingers">
+            <div class="section-title">
+              <i class="pi pi-forward"></i>
+              <span>Siguen</span>
             </div>
-          </ng-template>
-        </section>
+            
+            <div class="performers-list" *ngIf="nextSingers.length > 0; else noNext">
+              <div 
+                class="performer-item" 
+                *ngFor="let performer of nextSingers; let i = index; trackBy: trackByPerformer"
+              >
+                <div class="position-number">{{ i + 1 }}</div>
+                <div class="performer-details">
+                  <span class="name">{{ performer.name }}</span>
+                  <div class="song" *ngIf="parseTitle(performer.title_raw || performer.song) as song">
+                    <span class="artist" *ngIf="song.artist">{{ song.artist }}</span>
+                    <span class="separator" *ngIf="song.artist"> - </span>
+                    <span class="title">{{ song.title }}</span>
+                  </div>
+                </div>
+                <div class="youtube-indicator" *ngIf="performer.youtube_url || performer.youtubeLink">
+                  <i class="pi pi-youtube youtube-icon"></i>
+                </div>
+              </div>
+            </div>
+
+            <ng-template #noNext>
+              <div class="empty-message">
+                <i class="pi pi-users"></i>
+                <p>No hay más cantantes en espera</p>
+              </div>
+            </ng-template>
+          </section>
+
+        </div>
 
       </main>
 
@@ -157,7 +166,15 @@ import { environment } from '../../../environments/environment';
         </div>
         
         <div class="footer-center">
-          <span class="tenant-info">{{ tenantId }}</span>
+          <div class="tenant-info">
+            <img 
+              [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
+              [alt]="tenantData?.display_name || tenantId"
+              class="tenant-logo"
+              (error)="onImageError($event)"
+            />
+            <span class="tenant-name">{{ tenantData?.display_name || tenantId }}</span>
+          </div>
         </div>
         
         <div class="footer-right">
@@ -239,10 +256,47 @@ import { environment } from '../../../environments/environment';
     .queue-main {
       flex: 1;
       padding: 2rem 3rem;
+      overflow-y: auto;
+    }
+
+    /* Layout Horizontal para pantallas grandes */
+    .performers-horizontal-layout {
+      display: grid;
+      grid-template-columns: 2fr auto 1.5fr;
+      gap: 2rem;
+      align-items: start;
+      min-height: 0;
+      height: 100%;
+    }
+
+    /* Divisor vertical */
+    .vertical-divider {
+      width: 2px;
+      background: linear-gradient(to bottom, transparent, var(--brand-primary), transparent);
+      min-height: 200px;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .vertical-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background: var(--brand-primary);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--brand-primary);
+    }
+
+    /* Secciones principales */
+    .current-performer-section,
+    .next-performers-section {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
-      overflow-y: auto;
+      height: 100%;
     }
 
     .queue-empty {
@@ -287,33 +341,39 @@ import { environment } from '../../../environments/environment';
       background: linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(31, 41, 55, 0.6));
       border: 2px solid var(--glow-color);
       border-radius: 1.5rem;
-      padding: 3rem;
+      padding: 2rem;
       box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 2rem;
+      flex-direction: column;
+      gap: 1.5rem;
+      height: 100%;
+      min-height: 250px;
+    }
+
+    .performer-info {
+      flex: 1;
     }
 
     .performer-name {
-      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-size: clamp(2rem, 4vw, 3.5rem);
       font-weight: 900;
       margin: 0 0 1rem 0;
       color: #ffffff;
       text-shadow: 0 0 20px var(--glow-color);
       animation: text-glow 2s ease-in-out infinite alternate;
+      line-height: 1.1;
     }
 
     .song-info {
       display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     .song-details {
-      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-size: clamp(1rem, 2vw, 1.4rem);
       font-weight: 500;
+      line-height: 1.3;
     }
 
     .artist {
@@ -334,51 +394,67 @@ import { environment } from '../../../environments/environment';
     .performers-list {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      max-height: 400px;
+      gap: 0.8rem;
+      height: 100%;
       overflow-y: auto;
+      padding-right: 0.5rem;
     }
 
     .performer-item {
       background: rgba(31, 41, 55, 0.6);
       border: 1px solid rgba(75, 85, 99, 0.5);
-      border-radius: 1rem;
-      padding: 1.5rem;
+      border-radius: 0.8rem;
+      padding: 1rem 1.2rem;
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1rem;
       transition: all 0.3s ease;
+      min-height: 60px;
+      flex-shrink: 0;
     }
 
     .performer-item:hover {
       border-color: var(--brand-primary);
       background: rgba(99, 102, 241, 0.1);
+      transform: translateX(5px);
     }
 
     .position-number {
-      font-size: 2rem;
+      font-size: 1.4rem;
       font-weight: 900;
       color: var(--brand-primary);
       background: rgba(99, 102, 241, 0.2);
       border-radius: 50%;
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .performer-details {
+      flex: 1;
+      min-width: 0;
     }
 
     .performer-details .name {
-      font-size: 1.4rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: #ffffff;
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .performer-details .song {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       color: #9ca3af;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .youtube-indicator {
@@ -416,6 +492,29 @@ import { environment } from '../../../environments/environment';
       color: var(--brand-accent);
     }
 
+    .tenant-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+    }
+
+    .tenant-logo {
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid var(--brand-primary);
+    }
+
+    .tenant-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
     @keyframes text-glow {
       0% { text-shadow: 0 0 20px var(--glow-color); }
       100% { text-shadow: 0 0 30px var(--glow-color); }
@@ -431,10 +530,180 @@ import { environment } from '../../../environments/environment';
       50% { transform: translateY(-10px); }
     }
 
-    @media (max-width: 1200px) {
+    /* Responsividad para pantallas medianas (tablets landscape) */
+    @media (max-width: 1400px) {
+      .performers-horizontal-layout {
+        grid-template-columns: 1.8fr auto 1.2fr;
+        gap: 1.5rem;
+      }
+      
+      .performer-name {
+        font-size: clamp(1.8rem, 3.5vw, 3rem);
+      }
+      
+      .song-details {
+        font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+      }
+    }
+
+    /* Responsividad para pantallas pequeñas (tablets portrait y móviles) */
+    @media (max-width: 1024px) {
+      .queue-header {
+        padding: 1rem 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+        min-height: auto;
+      }
+
+      .header-center {
+        order: 3;
+        flex-basis: 100%;
+      }
+
+      .tagline {
+        font-size: 1.2rem;
+      }
+
+      .queue-main {
+        padding: 1.5rem 2rem;
+      }
+
+      /* Layout vertical para pantallas pequeñas */
+      .performers-horizontal-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .vertical-divider {
+        display: none;
+      }
+
+      .current-performer-section {
+        order: 1;
+      }
+
+      .next-performers-section {
+        order: 2;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
       .performer-card {
+        padding: 1.5rem;
+        min-height: 200px;
+      }
+
+      .performer-name {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        margin-bottom: 0.8rem;
+      }
+
+      .song-details {
+        font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+      }
+
+      .queue-footer {
+        padding: 1rem 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .qr-section {
+        padding: 0.8rem;
+      }
+    }
+
+    /* Responsividad para móviles */
+    @media (max-width: 768px) {
+      .queue-header {
+        padding: 0.8rem 1rem;
+      }
+
+      .logo-text {
+        font-size: 1.8rem;
+      }
+
+      .logo-icon {
+        font-size: 2rem;
+      }
+
+      .tagline {
+        font-size: 1rem;
+      }
+
+      .current-time {
+        font-size: 1.1rem;
+        padding: 0.4rem 0.8rem;
+      }
+
+      .queue-main {
+        padding: 1rem;
+      }
+
+      .section-title i {
+        font-size: 1.5rem;
+      }
+
+      .section-title span {
+        font-size: 1.4rem;
+      }
+
+      .performer-card {
+        padding: 1.2rem;
+        min-height: 150px;
+      }
+
+      .performer-item {
+        padding: 0.8rem 1rem;
+        min-height: 50px;
+      }
+
+      .position-number {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2rem;
+      }
+
+      .performer-details .name {
+        font-size: 1rem;
+      }
+
+      .performer-details .song {
+        font-size: 0.85rem;
+      }
+
+      .youtube-indicator {
+        font-size: 1.2rem;
+      }
+
+      .queue-footer {
+        padding: 0.8rem 1rem;
+      }
+
+      .qr-section {
         flex-direction: column;
         text-align: center;
+        gap: 0.5rem;
+        padding: 0.6rem;
+      }
+
+      .qr-label {
+        font-size: 0.9rem;
+      }
+
+      .tenant-info {
+        padding: 0.5rem;
+        gap: 0.5rem;
+      }
+
+      .tenant-logo {
+        width: 28px;
+        height: 28px;
+      }
+
+      .tenant-name {
+        font-size: 0.9rem;
       }
     }
   `]
@@ -445,20 +714,26 @@ export class QueueComponent implements OnInit, OnDestroy {
 
   entries: QueueEntry[] = [];
   tenantId: string;
+  tenantData: Tenant | null = null;
   now = new Date();
   joinUrl = '';
 
   constructor(
     private route: ActivatedRoute,
-    private queueService: QueueService
+    private queueService: QueueService,
+    private tenantService: TenantService,
+    private urlService: UrlService
   ) {
     // Obtener tenantId desde queryParams
     this.tenantId = this.route.snapshot.queryParamMap.get('tenant') || environment.defaultTenant;
-    this.joinUrl = `${window.location.origin}/join?tenant=${this.tenantId}`;
+    this.joinUrl = this.urlService.buildJoinUrl(this.tenantId);
   }
 
   ngOnInit(): void {
     console.log('QueueComponent inicializado para tenant:', this.tenantId);
+    
+    // Cargar datos del tenant
+    this.loadTenantData();
     
     // Iniciar polling para obtener las entradas de la cola
     this.queueService.startPolling(this.tenantId, 4000)
@@ -597,5 +872,43 @@ export class QueueComponent implements OnInit, OnDestroy {
    */
   hasEntries(): boolean {
     return this.entries.length > 0;
+  }
+
+  /**
+   * TrackBy function para optimizar la lista de performers
+   * @param index Índice del elemento
+   * @param item QueueEntry
+   * @returns ID único del elemento
+   */
+  trackByPerformer(index: number, item: QueueEntry): any {
+    return item.id || index;
+  }
+
+  /**
+   * Cargar datos del tenant actual
+   */
+  private loadTenantData(): void {
+    console.log('Cargando datos del tenant:', this.tenantId);
+    
+    this.tenantService.getTenantDetails(this.tenantId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (tenant) => {
+          this.tenantData = tenant;
+          console.log('Datos del tenant cargados:', tenant);
+        },
+        error: (error) => {
+          console.error('Error al cargar datos del tenant:', error);
+          // Mantener tenantData como null, se mostrará el tenantId como fallback
+        }
+      });
+  }
+
+  /**
+   * Manejar errores de carga de imagen del logo
+   */
+  onImageError(event: any): void {
+    console.log('Error cargando logo del tenant, usando imagen por defecto');
+    event.target.src = '/layout/images/logo/logo.png';
   }
 }
