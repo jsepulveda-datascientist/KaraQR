@@ -3,7 +3,7 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "ultima-ng": {
+        "karaQR": {
             "projectType": "application",
             "schematics": {
                 "@schematics/angular:component": {
@@ -17,7 +17,7 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:application",
                     "options": {
-                        "outputPath": "dist/ultima-ng",
+                        "outputPath": "dist/karaQR",
                         "index": "src/index.html",
                         "browser": "src/main.ts",
                         "polyfills": [
@@ -34,20 +34,25 @@
                         "styles": [
                             "src/assets/styles.scss"
                         ],
-                        "scripts": []
+                        "scripts": [],
+                        "allowedCommonJsDependencies": [
+                            "qrcode",
+                            "quill-delta",
+                            "tslib"
+                        ]
                     },
                     "configurations": {
                         "production": {
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "1mb",
-                                    "maximumError": "5mb"
+                                    "maximumWarning": "1.5mb",
+                                    "maximumError": "2mb"
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "2kb",
-                                    "maximumError": "4kb"
+                                    "maximumWarning": "6kb",
+                                    "maximumError": "10kb"
                                 }
                             ],
                             "outputHashing": "all"
@@ -64,10 +69,10 @@
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "configurations": {
                         "production": {
-                            "buildTarget": "ultima-ng:build:production"
+                            "buildTarget": "karaQR:build:production"
                         },
                         "development": {
-                            "buildTarget": "ultima-ng:build:development"
+                            "buildTarget": "karaQR:build:development"
                         }
                     },
                     "defaultConfiguration": "development"

@@ -1,6 +1,6 @@
 {
-    "name": "ultima-ng",
-    "version": "20.0.0",
+    "name": "karaqr",
+    "version": "1.0.0",
     "scripts": {
         "ng": "ng",
         "start": "ng serve",

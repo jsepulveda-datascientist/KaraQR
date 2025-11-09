@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   apiBase: 'https://sphllmtaepeeiozqljsb.supabase.co',
   defaultTenant: 'demo-venue',
   supabaseUrl: 'https://sphllmtaepeeiozqljsb.supabase.co',
