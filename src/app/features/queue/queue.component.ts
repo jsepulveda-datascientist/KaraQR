@@ -727,6 +727,11 @@ export class QueueComponent implements OnInit, OnDestroy {
     // Obtener tenantId desde queryParams
     this.tenantId = this.route.snapshot.queryParamMap.get('tenant') || environment.defaultTenant;
     this.joinUrl = this.urlService.buildJoinUrl(this.tenantId);
+    
+    // LOG para verificar environment en producción
+    console.log('Environment baseUrl:', environment.baseUrl);
+    console.log('Environment production:', environment.production);
+    console.log('Generated joinUrl:', this.joinUrl);
   }
 
   ngOnInit(): void {
