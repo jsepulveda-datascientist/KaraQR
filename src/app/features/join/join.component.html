@@ -1,0 +1,111 @@
+<div class="join-container p-fluid">
+  <p-card 
+    header="🎤 Anótate para cantar" 
+    [style]="{width: '100%', 'max-width': '480px', margin: '0 auto'}"
+    styleClass="join-card">
+    
+    <form [formGroup]="joinForm" (ngSubmit)="onSubmit()" (keydown)="onKeyDown($event)" novalidate>
+      
+      <!-- Campo Nombre -->
+      <div class="field">
+        <label for="name" class="block text-900 font-medium mb-2">
+          Nombre *
+        </label>
+        <input 
+          pInputText 
+          id="name"
+          formControlName="name"
+          placeholder="Ingresa tu nombre"
+          class="w-full"
+          [class.ng-invalid]="hasFieldError('name', 'required') || hasFieldError('name', 'minlength')"
+          [attr.aria-invalid]="hasFieldError('name', 'required') || hasFieldError('name', 'minlength')"
+          [attr.aria-describedby]="hasFieldError('name', 'required') || hasFieldError('name', 'minlength') ? 'name-error' : null"
+          autocomplete="given-name"
+        />
+        <small 
+          id="name-error" 
+          class="p-error block mt-1" 
+          *ngIf="hasFieldError('name', 'required') || hasFieldError('name', 'minlength')"
+          role="alert"
+        >
+          {{ getFieldErrorMessage('name') }}
+        </small>
+      </div>
+
+      <!-- Campo Canción -->
+      <div class="field">
+        <label for="song" class="block text-900 font-medium mb-2">
+          Canción *
+        </label>
+        <p-autoComplete
+          inputId="song"
+          formControlName="song"
+          [suggestions]="filteredSongs"
+          (completeMethod)="completeSongs($event)"
+          placeholder="Busca o selecciona una canción"
+          [dropdown]="true"
+          appendTo="body"
+          [style]="{width: '100%'}"
+          [class.ng-invalid]="hasFieldError('song', 'required')"
+          [attr.aria-invalid]="hasFieldError('song', 'required')"
+          [attr.aria-describedby]="hasFieldError('song', 'required') ? 'song-error' : null"
+          optionLabel="value"
+          [forceSelection]="false"
+          [minLength]="2"
+          [delay]="300"
+          emptyMessage="No se encontraron canciones"
+          loadingIcon="pi pi-spinner pi-spin"
+        >
+        </p-autoComplete>
+        <small 
+          id="song-error" 
+          class="p-error block mt-1" 
+          *ngIf="hasFieldError('song', 'required')"
+          role="alert"
+        >
+          {{ getFieldErrorMessage('song') }}
+        </small>
+      </div>
+
+      <!-- Botón de Submit -->
+      <div class="field mt-4">
+        <button 
+          pButton 
+          type="submit"
+          label="Anotarme 🎵"
+          class="w-full p-button-lg join-submit-btn"
+          [disabled]="joinForm.invalid || joinForm.pristine || isSubmitting"
+          [loading]="isSubmitting"
+          loadingIcon="pi pi-spinner pi-spin"
+          [attr.aria-label]="isSubmitting ? 'Procesando registro...' : 'Anotarse para cantar'"
+        >
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Footer con información del tenant -->
+    <ng-container pTemplate="footer">
+      <div class="text-center">
+        <small class="text-500">
+          <i class="pi pi-qrcode mr-1"></i>
+          Escaneado para <strong>{{ tenantId }}</strong>
+        </small>
+      </div>
+    </ng-container>
+
+  </p-card>
+
+  <!-- Toast para feedback -->
+  <p-toast 
+    position="top-center"
+    [style]="{marginTop: '80px'}"
+    [life]="5000"
+    [showTransformOptions]="'translateY(-100%)'"
+    [hideTransformOptions]="'translateY(-100%)'"
+    [showTransitionOptions]="'300ms ease-out'"
+    [hideTransitionOptions]="'250ms ease-in'"
+  >
+  </p-toast>
+
+</div>

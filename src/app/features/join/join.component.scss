@@ -1,0 +1,315 @@
+/* Mobile-first approach para JoinComponent */
+
+.join-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--surface-50) 0%, var(--surface-100) 100%);
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+}
+
+.join-card {
+  width: 100%;
+  max-width: 480px !important;
+  margin: 0 auto;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  // Header personalizado
+  ::ng-deep .p-card-header {
+    background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+    color: white;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-radius: 1rem 1rem 0 0;
+    padding: 1.5rem;
+    
+    @media (max-width: 480px) {
+      padding: 1rem;
+      font-size: 1.1rem;
+    }
+  }
+
+  ::ng-deep .p-card-content {
+    padding: 2rem;
+    
+    @media (max-width: 480px) {
+      padding: 1.5rem 1rem;
+    }
+  }
+
+  ::ng-deep .p-card-footer {
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--surface-200);
+    background: var(--surface-50);
+    border-radius: 0 0 1rem 1rem;
+    
+    @media (max-width: 480px) {
+      padding: 1rem;
+    }
+  }
+}
+
+// Campos del formulario
+.field {
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 480px) {
+    margin-bottom: 1.25rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.9rem;
+
+    @media (max-width: 480px) {
+      font-size: 0.85rem;
+    }
+  }
+
+  // Estilos para inputs
+  ::ng-deep .p-inputtext {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--surface-300);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+
+    @media (max-width: 480px) {
+      padding: 0.875rem 1rem; // Más padding en móvil para mejor UX táctil
+      font-size: 16px; // Evita zoom en iOS
+    }
+
+    &:focus {
+      border-color: var(--primary-500);
+      box-shadow: 0 0 0 2px rgba(var(--primary-500-rgb), 0.2);
+      outline: none;
+    }
+
+    &.ng-invalid.ng-touched {
+      border-color: var(--red-500);
+      box-shadow: 0 0 0 2px rgba(var(--red-500-rgb), 0.2);
+    }
+
+    &::placeholder {
+      color: var(--text-color-secondary);
+      opacity: 0.7;
+    }
+  }
+
+  // Estilos para AutoComplete
+  ::ng-deep .p-autocomplete {
+    width: 100%;
+
+    .p-autocomplete-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      border: 2px solid var(--surface-300);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+
+      @media (max-width: 480px) {
+        padding: 0.875rem 1rem;
+        font-size: 16px; // Evita zoom en iOS
+      }
+
+      &:focus {
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 2px rgba(var(--primary-500-rgb), 0.2);
+      }
+
+      &.ng-invalid.ng-touched {
+        border-color: var(--red-500);
+        box-shadow: 0 0 0 2px rgba(var(--red-500-rgb), 0.2);
+      }
+    }
+
+    .p-autocomplete-dropdown {
+      border: 2px solid var(--surface-300);
+      border-left: none;
+      border-radius: 0 0.5rem 0.5rem 0;
+      background: var(--surface-100);
+
+      &:hover {
+        background: var(--surface-200);
+      }
+    }
+  }
+
+  // Mensajes de error
+  .p-error {
+    color: var(--red-500);
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+    display: block;
+
+    @media (max-width: 480px) {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Botón de submit
+.join-submit-btn {
+  font-size: 1.1rem !important;
+  padding: 0.875rem 1.5rem !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease !important;
+  
+  @media (max-width: 480px) {
+    font-size: 1rem !important;
+    padding: 1rem 1.5rem !important; // Más área táctil en móvil
+  }
+
+  &:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600)) !important;
+    border: none !important;
+    color: white !important;
+
+    &:hover {
+      background: linear-gradient(135deg, var(--primary-600), var(--primary-700)) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(var(--primary-500-rgb), 0.3);
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(var(--primary-500-rgb), 0.4) !important;
+      outline: none;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &:disabled {
+    background: var(--surface-300) !important;
+    color: var(--text-color-secondary) !important;
+    border: none !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  // Icono del botón
+  ::ng-deep .p-button-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+// Estilos para el panel de autocomplete
+::ng-deep .p-autocomplete-panel {
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid var(--surface-300) !important;
+  max-height: 200px;
+  
+  .p-autocomplete-items {
+    .p-autocomplete-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: background-color 0.15s;
+
+      &:hover {
+        background: var(--surface-100);
+      }
+
+      &.p-highlight {
+        background: var(--primary-500);
+        color: white;
+      }
+    }
+
+    .p-autocomplete-empty-message {
+      padding: 1rem;
+      color: var(--text-color-secondary);
+      text-align: center;
+      font-style: italic;
+    }
+  }
+}
+
+// Toast personalizado
+::ng-deep .p-toast {
+  .p-toast-message {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    
+    &.p-toast-message-success {
+      background: linear-gradient(135deg, var(--green-500), var(--green-600));
+      border: none;
+      color: white;
+      
+      .p-toast-icon-close {
+        color: white;
+      }
+    }
+    
+    &.p-toast-message-error {
+      background: linear-gradient(135deg, var(--red-500), var(--red-600));
+      border: none;
+      color: white;
+      
+      .p-toast-icon-close {
+        color: white;
+      }
+    }
+  }
+}
+
+// Animaciones adicionales
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.join-submit-btn.p-button-loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+// Variables CSS personalizadas si no existen
+:host {
+  --brand-primary: var(--primary-500, #3B82F6);
+  --brand-primary-rgb: var(--primary-500-rgb, 59, 130, 246);
+  
+  // Asegurar que las variables de color existan
+  --primary-500: var(--primary-color, #3B82F6);
+  --primary-600: var(--primary-color-dark, #2563EB);
+  --primary-700: var(--primary-color-darker, #1D4ED8);
+}
+
+// Mejoras de accesibilidad
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Soporte para modo oscuro (si está configurado)
+@media (prefers-color-scheme: dark) {
+  .join-container {
+    background: linear-gradient(135deg, var(--surface-900) 0%, var(--surface-800) 100%);
+  }
+}

@@ -1,0 +1,262 @@
+<!-- Toast global para feedback -->
+<p-toast></p-toast>
+
+<!-- Dialog PIN de acceso -->
+<p-dialog 
+  header="Acceso de Administrador"
+  [(visible)]="adminPinDialog"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid pin-dialog"
+  [style]="{width: '500px'}">
+  
+  <div class="p-4">
+    <div class="flex align-items-center gap-3 mb-4">
+      <i class="pi pi-shield text-5xl text-orange-500"></i>
+      <div>
+        <h3 class="m-0 text-2xl font-bold">Control de KaraQR</h3>
+        <p class="m-0 text-color-secondary">Ingrese el PIN de administrador de 4 dígitos</p>
+      </div>
+    </div>
+    
+    <div class="field text-center">
+      <label for="pin" class="block mb-3 font-semibold">PIN de Administrador</label>
+      <p-inputOtp 
+        [(ngModel)]="adminPinInput" 
+        [length]="4"
+        [mask]="true"
+        class="justify-content-center"
+        (onComplete)="validatePin()"
+        placeholder="•">
+      </p-inputOtp>
+      
+      <small class="block mt-2 text-color-secondary">
+        Ingrese el código de 4 dígitos para acceder al panel
+      </small>
+    </div>
+    
+    <div class="flex flex-column gap-2 mt-5">
+      <p-button 
+        label="Validar PIN" 
+        icon="pi pi-lock-open"
+        (onClick)="validatePin()"
+        [disabled]="!adminPinInput || adminPinInput.length !== 4"
+        [loading]="isValidatingPin"
+        class="w-full"
+        size="large">
+      </p-button>
+      
+      <p-button 
+        label="Limpiar"
+        icon="pi pi-times"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="clearPin()"
+        class="w-full">
+      </p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Pantalla principal de administración -->
+<div class="admin-container" *ngIf="!adminPinDialog">
+  
+  <!-- Header -->
+  <div class="admin-header p-4">
+    <div class="flex align-items-center justify-content-between">
+      <div class="flex align-items-center gap-3">
+        <i class="pi pi-cog text-4xl text-primary"></i>
+        <div>
+          <h1 class="m-0 text-3xl font-bold">Admin KaraQR</h1>
+          <p class="m-0 text-sm text-color-secondary">Control remoto para {{ tenantId }}</p>
+        </div>
+      </div>
+      
+      <div class="flex align-items-center gap-2">
+        <p-tag 
+          [value]="'Conectado'" 
+          severity="success" 
+          icon="pi pi-check-circle">
+        </p-tag>
+        <span class="text-sm text-color-secondary">{{ now | date:'shortTime' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- Controles principales -->
+  <div class="control-panel p-4">
+    <h2 class="text-xl font-bold mb-3">Controles Principales</h2>
+    
+    <div class="controls-grid">
+      <!-- Llamar siguiente -->
+      <div class="control-item">
+        <p-button 
+          label="Siguiente"
+          icon="pi pi-forward"
+          severity="info"
+          size="large"
+          class="w-full control-btn"
+          (onClick)="callNext()"
+          [disabled]="!canCallNext()"
+          [loading]="isLoadingAction">
+        </p-button>
+      </div>
+
+      <!-- Pausar/Retomar -->
+      <div class="control-item">
+        <p-button 
+          [label]="getCurrentPerformer()?.status === 'performing' ? 'Pausar' : 'Retomar'"
+          icon="pi pi-pause"
+          severity="help"
+          size="large"
+          class="w-full control-btn"
+          (onClick)="togglePause()"
+          [disabled]="!getCurrentPerformer()"
+          [loading]="isLoadingAction">
+        </p-button>
+      </div>
+
+      <!-- Marcar como hecho -->
+      <div class="control-item">
+        <p-button 
+          label="Finalizado"
+          icon="pi pi-check"
+          severity="success"
+          size="large"
+          class="w-full control-btn"
+          (onClick)="markCurrentDone()"
+          [disabled]="!getCurrentPerformer()"
+          [loading]="isLoadingAction">
+        </p-button>
+      </div>
+
+      <!-- Recargar vista -->
+      <div class="control-item">
+        <p-button 
+          label="Recargar"
+          icon="pi pi-refresh"
+          severity="secondary"
+          size="large"
+          class="w-full control-btn"
+          (onClick)="reloadQueue()"
+          [loading]="isLoadingAction">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- Estado actual -->
+  <div class="current-state p-4" *ngIf="getCurrentPerformer() as current">
+    <h2 class="text-xl font-bold mb-3">Estado Actual</h2>
+    <div class="current-performer-card p-3 border-round-lg surface-ground">
+      <div class="flex align-items-center gap-3">
+        <i class="pi pi-microphone text-4xl text-primary"></i>
+        <div class="flex-1">
+          <h3 class="m-0 text-lg font-bold">{{ current.name }}</h3>
+          <p class="m-0 text-color-secondary">{{ current.title_raw }}</p>
+          <div class="mt-2" *ngIf="current.youtube_url">
+            <a [href]="current.youtube_url" target="_blank" class="text-sm text-primary">
+              <i class="pi pi-youtube mr-1"></i>Ver en YouTube
+            </a>
+          </div>
+        </div>
+        <p-tag 
+          [value]="getStatusText(current.status)" 
+          [severity]="getStatusSeverity(current.status)"
+          class="text-lg">
+        </p-tag>
+      </div>
+    </div>
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- Tabla de cola -->
+  <div class="queue-table p-4">
+    <h2 class="text-xl font-bold mb-3">Cola de Espera</h2>
+    
+    <p-table 
+      [value]="entries" 
+      [paginator]="entries.length > 10"
+      [rows]="10"
+      [loading]="isLoadingQueue"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{'min-width': '50rem'}">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem">#</th>
+          <th>Nombre</th>
+          <th>Canción</th>
+          <th style="width: 8rem">Estado</th>
+          <th style="width: 3rem">YouTube</th>
+          <th style="width: 12rem">Acciones</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-entry let-rowIndex="rowIndex">
+        <tr>
+          <td>{{ rowIndex + 1 }}</td>
+          <td class="font-bold">{{ entry.name }}</td>
+          <td>{{ entry.title_raw }}</td>
+          <td>
+            <p-tag 
+              [value]="getStatusText(entry.status)" 
+              [severity]="getStatusSeverity(entry.status)">
+            </p-tag>
+          </td>
+          <td>
+            <a 
+              *ngIf="entry.youtube_url"
+              [href]="entry.youtube_url" 
+              target="_blank"
+              class="text-red-500">
+              <i class="pi pi-youtube"></i>
+            </a>
+            <span *ngIf="!entry.youtube_url" class="text-color-secondary">-</span>
+          </td>
+          <td>
+            <div class="flex gap-1">
+              <p-button 
+                icon="pi pi-play"
+                size="small"
+                severity="success"
+                [outlined]="true"
+                (onClick)="setPerforming(entry)"
+                [disabled]="entry.status === 'performing' || entry.status === 'done'"
+                pTooltip="Poner en escena">
+              </p-button>
+              
+              <p-button 
+                icon="pi pi-check"
+                size="small"
+                severity="info"
+                [outlined]="true"
+                (onClick)="markDone(entry)"
+                [disabled]="entry.status === 'done'"
+                pTooltip="Marcar como hecho">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center p-4">
+            <div class="text-color-secondary">
+              <i class="pi pi-inbox text-4xl mb-2"></i>
+              <p>No hay entradas en la cola</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
