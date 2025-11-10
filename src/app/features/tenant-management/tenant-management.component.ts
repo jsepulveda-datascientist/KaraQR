@@ -177,13 +177,13 @@ export class TenantManagementComponent implements OnInit, OnDestroy {
     }
 
     // Limpiar y validar ID
-    this.createForm.id = this.createForm.id.trim().toUpperCase();
+    this.createForm.id = this.createForm.id.trim();
     
-    if (!/^[A-Z0-9_-]+$/.test(this.createForm.id)) {
+    if (!/^[A-Za-z0-9_-]+$/.test(this.createForm.id)) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Validación',
-        detail: 'El ID debe contener solo letras, números, guiones y guiones bajos'
+        detail: 'El ID debe contener solo letras (mayúsculas o minúsculas), números, guiones y guiones bajos'
       });
       return;
     }

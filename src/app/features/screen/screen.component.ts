@@ -111,7 +111,7 @@ export class ScreenComponent implements OnInit, OnDestroy {
     console.log('ScreenComponent.confirmTenantCode() - Validando tenant:', this.tenantCode);
     
     // Validar el tenant contra el backend
-    this.tenantService.validateTenant(this.tenantCode.trim().toUpperCase())
+    this.tenantService.validateTenant(this.tenantCode.trim())
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result: TenantValidationResult) => {

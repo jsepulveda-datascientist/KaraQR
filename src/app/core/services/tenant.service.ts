@@ -28,7 +28,7 @@ export class TenantService {
       return from([{ isValid: false, error: 'Código de tenant requerido' }]);
     }
 
-    const cleanTenantId = tenantId.trim().toUpperCase();
+    const cleanTenantId = tenantId.trim();
     console.log('TenantService.validateTenant() - Buscando tenant:', cleanTenantId);
 
     return from(
@@ -84,7 +84,7 @@ export class TenantService {
 
         // Crear el registro del tenant en la tabla tenants
         const tenantRecord = {
-          id: request.id.toUpperCase(),
+          id: request.id,
           display_name: request.display_name,
           primary_hex: request.primary_hex || '#00B8FF',
           accent_hex: request.accent_hex || '#FF3FA4',
@@ -205,11 +205,11 @@ export class TenantService {
   getTenantDetails(tenantId: string): Observable<Tenant | null> {
     console.log('TenantService.getTenantDetails() - ID:', tenantId);
 
-    return from(
+      return from(
       (this.supabaseService as any).client
         .from('tenants')
         .select('*')
-        .eq('id', tenantId.trim().toUpperCase())
+        .eq('id', tenantId.trim())
         .limit(1)
     ).pipe(
       map(({ data, error }: any) => {
@@ -244,7 +244,7 @@ export class TenantService {
       this.supabaseService.client
         .from('queue')
         .select('*')
-        .eq('tenant_id', tenantId.trim().toUpperCase())
+        .eq('tenant_id', tenantId.trim())
         .order('created_at', { ascending: false })
     ).pipe(
       map(({ data, error }: any) => {
@@ -304,14 +304,14 @@ export class TenantService {
     }
 
     console.log('TenantService.updateTenant() - Datos de actualización:', updateData);
-    console.log('TenantService.updateTenant() - Buscando tenant con ID:', tenantId.toUpperCase());
+    console.log('TenantService.updateTenant() - Buscando tenant con ID:', tenantId);
 
     // Primero verificar que el registro existe
     return from(
       (this.supabaseService as any).client
         .from('tenants')
         .select('id, display_name')
-        .eq('id', tenantId.toUpperCase())
+        .eq('id', tenantId)
         .limit(1)
     ).pipe(
       switchMap((selectResponse: any) => {
@@ -326,7 +326,7 @@ export class TenantService {
           (this.supabaseService as any).client
             .from('tenants')
             .update(updateData)
-            .eq('id', tenantId.toUpperCase())
+            .eq('id', tenantId)
             .select()
         );
       }),
@@ -431,7 +431,7 @@ export class TenantService {
       (this.supabaseService as any).client
         .from('tenants')
         .delete()
-        .eq('id', tenantId.trim().toUpperCase())
+        .eq('id', tenantId.trim())
     ).pipe(
       map(({ error }: any) => {
         if (error) {

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -46,26 +46,36 @@ import { environment } from '../../../environments/environment';
           <span class="tagline">🎤 Tu turno para brillar 🎤</span>
         </div>
         <div class="header-right">
-          <div class="current-time">
-            {{ now | date:'shortTime' }}
+          <div class="tenant-header-info">
+            <img 
+              [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
+              [alt]="tenantData?.display_name || tenantId"
+              class="tenant-header-logo"
+              (error)="onImageError($event)"
+            />
+            <div class="tenant-header-text">
+              <span class="tenant-header-name">{{ tenantData?.display_name || tenantId }}</span>
+              <span class="current-time">{{ now | date:'shortTime' }}</span>
+            </div>
           </div>
         </div>
       </header>
 
       <!-- Contenido Principal -->
-      <main class="queue-main" *ngIf="hasEntries(); else noEntries">
+      <main class="queue-main">
         
         <!-- Layout Horizontal para TV / Desktop -->
         <div class="performers-horizontal-layout">
           
           <!-- Cantante Actual -->
-          <section class="current-performer-section" *ngIf="current() as currentSinger">
+          <section class="current-performer-section">
             <div class="section-title">
               <i class="pi pi-play-circle"></i>
               <span>Ahora en escena</span>
             </div>
             
-            <div class="performer-card">
+            <!-- Cuando hay cantante actual -->
+            <div class="performer-card" *ngIf="current() as currentSinger; else noCurrentSinger">
               <div class="performer-info">
                 <h2 class="performer-name">{{ currentSinger.name }}</h2>
                 <div class="song-info">
@@ -95,77 +105,100 @@ import { environment } from '../../../environments/environment';
                 </p-button>
               </div>
             </div>
+
+            <!-- Template cuando no hay cantante actual -->
+            <ng-template #noCurrentSinger>
+              <div class="performer-card waiting-state">
+                <div class="waiting-content">
+                  <i class="pi pi-clock waiting-icon"></i>
+                  <h2 class="waiting-title">🎶 En espera del próximo cantante...</h2>
+                  <p class="waiting-subtitle">¡Escanea el QR para anotarte al karaoke!</p>
+                </div>
+              </div>
+            </ng-template>
           </section>
 
           <!-- Divisor Vertical -->
           <div class="vertical-divider"></div>
 
           <!-- Próximos Cantantes -->
-          <section class="next-performers-section" *ngIf="next() as nextSingers">
+          <section class="next-performers-section">
             <div class="section-title">
               <i class="pi pi-forward"></i>
               <span>Siguen</span>
             </div>
             
-            <div class="performers-list" *ngIf="nextSingers.length > 0; else noNext">
-              <div 
-                class="performer-item" 
-                *ngFor="let performer of nextSingers; let i = index; trackBy: trackByPerformer"
-              >
-                <div class="position-number">{{ i + 1 }}</div>
-                <div class="performer-details">
-                  <span class="name">{{ performer.name }}</span>
-                  <div class="song" *ngIf="parseTitle(performer.title_raw || performer.song) as song">
-                    <span class="artist" *ngIf="song.artist">{{ song.artist }}</span>
-                    <span class="separator" *ngIf="song.artist"> - </span>
-                    <span class="title">{{ song.title }}</span>
+            <!-- Cuando hay próximos cantantes -->
+            <div *ngIf="next() as nextSingers">
+              <div *ngIf="nextSingers.length > 0; else showQRCodeWhenEmpty">
+                <div class="performers-list">
+                  <div 
+                    class="performer-item" 
+                    *ngFor="let performer of nextSingers; let i = index; trackBy: trackByPerformer"
+                  >
+                    <div class="position-number">{{ i + 1 }}</div>
+                    <div class="performer-details">
+                      <span class="name">{{ performer.name }}</span>
+                      <div class="song" *ngIf="parseTitle(performer.title_raw || performer.song) as song">
+                        <span class="artist" *ngIf="song.artist">{{ song.artist }}</span>
+                        <span class="separator" *ngIf="song.artist"> - </span>
+                        <span class="title">{{ song.title }}</span>
+                      </div>
+                    </div>
+                    <div class="youtube-indicator" *ngIf="performer.youtube_url || performer.youtubeLink">
+                      <i class="pi pi-youtube youtube-icon"></i>
+                    </div>
                   </div>
                 </div>
-                <div class="youtube-indicator" *ngIf="performer.youtube_url || performer.youtubeLink">
-                  <i class="pi pi-youtube youtube-icon"></i>
+
+                <!-- QR Code cuando hay cantantes -->
+                <div class="qr-section-next">
+                  <qrcode 
+                    [qrdata]="joinUrl" 
+                    [width]="120"
+                    [elementType]="'canvas'"
+                    [margin]="2"
+                    class="qr-code">
+                  </qrcode>
+                  <span class="qr-label">Escanea para anotarte</span>
                 </div>
               </div>
+
+              <!-- Template cuando lista está vacía - Mostrar QR prominente -->
+              <ng-template #showQRCodeWhenEmpty>
+                <div class="qr-section-next prominent">
+                  <qrcode 
+                    [qrdata]="joinUrl" 
+                    [width]="120"
+                    [elementType]="'canvas'"
+                    [margin]="2"
+                    class="qr-code">
+                  </qrcode>
+                  <span class="qr-label">Escanea para anotarte al karaoke</span>
+                </div>
+              </ng-template>
             </div>
 
-            <ng-template #noNext>
-              <div class="empty-message">
-                <i class="pi pi-users"></i>
-                <p>No hay más cantantes en espera</p>
-              </div>
-            </ng-template>
+            <!-- Fallback si next() es null/undefined -->
+            <div *ngIf="!next()" class="qr-section-next prominent">
+              <qrcode 
+                [qrdata]="joinUrl" 
+                [width]="120"
+                [elementType]="'canvas'"
+                [margin]="2"
+                class="qr-code">
+              </qrcode>
+              <span class="qr-label">Escanea para anotarte al karaoke</span>
+            </div>
           </section>
 
         </div>
 
       </main>
 
-      <!-- Mensaje cuando no hay entradas -->
-      <ng-template #noEntries>
-        <main class="queue-empty">
-          <div class="empty-content">
-            <i class="pi pi-music-note empty-icon"></i>
-            <h2>🎶 Esperando próximo cantante...</h2>
-            <p>¡Escanea el QR para anotarte!</p>
-          </div>
-        </main>
-      </ng-template>
-
-      <!-- Footer -->
+      <!-- Compact Footer -->
       <footer class="queue-footer">
-        <div class="footer-left">
-          <div class="qr-section">
-            <qrcode 
-              [qrdata]="joinUrl" 
-              [width]="120"
-              [elementType]="'canvas'"
-              [margin]="2"
-              class="qr-code">
-            </qrcode>
-            <span class="qr-label">Escanea para anotarte</span>
-          </div>
-        </div>
-        
-        <div class="footer-center">
+        <div class="footer-content">
           <div class="tenant-info">
             <img 
               [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
@@ -175,10 +208,7 @@ import { environment } from '../../../environments/environment';
             />
             <span class="tenant-name">{{ tenantData?.display_name || tenantId }}</span>
           </div>
-        </div>
-        
-        <div class="footer-right">
-          <span class="brand-hashtag">#KaraQR</span>
+          <span class="powered-by">Powered by KaraQR</span>
         </div>
       </footer>
 
@@ -350,6 +380,42 @@ import { environment } from '../../../environments/environment';
       min-height: 250px;
     }
 
+    /* Waiting state styles */
+    .performer-card.waiting-state {
+      border: 2px solid rgba(156, 163, 175, 0.5);
+      box-shadow: 0 0 20px rgba(156, 163, 175, 0.2);
+      background: linear-gradient(135deg, rgba(55, 65, 81, 0.6), rgba(75, 85, 99, 0.4));
+    }
+
+    .waiting-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      gap: 1rem;
+    }
+
+    .waiting-icon {
+      font-size: 3rem;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+
+    .waiting-title {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      font-weight: 700;
+      margin: 0;
+      color: #d1d5db;
+    }
+
+    .waiting-subtitle {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: #9ca3af;
+      margin: 0;
+    }
+
     .performer-info {
       flex: 1;
     }
@@ -462,34 +528,85 @@ import { environment } from '../../../environments/environment';
       font-size: 1.5rem;
     }
 
+    /* QR Section in Next Performers */
+    .qr-section-next {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 1rem;
+      border-radius: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .qr-section-next .qr-code {
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .qr-section-next .qr-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1f2937;
+      text-align: center;
+    }
+
+    /* QR Section prominent when no singers */
+    .qr-section-next.prominent {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95));
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      border: 2px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .qr-section-next.prominent .qr-label {
+      font-size: 1.1rem;
+      color: #374151;
+      margin-top: 0.5rem;
+    }
+
+    /* QR Section Central when no singers */
+    .qr-section-central {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 1.5rem;
+      margin-top: 2rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .qr-code-large {
+      border-radius: 1rem;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .qr-label-central {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    /* Compact Footer */
     .queue-footer {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      padding: 1.5rem 3rem;
+      padding: 1rem 3rem;
       background: rgba(0, 0, 0, 0.4);
       border-top: 1px solid rgba(75, 85, 99, 0.3);
     }
 
-    .qr-section {
+    .footer-content {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 1rem;
-      border-radius: 1rem;
-    }
-
-    .qr-label {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #1f2937;
-    }
-
-    .footer-right {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--brand-accent);
+      gap: 2rem;
     }
 
     .tenant-info {
@@ -513,6 +630,12 @@ import { environment } from '../../../environments/environment';
       font-size: 1rem;
       font-weight: 600;
       color: #1f2937;
+    }
+
+    .powered-by {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-style: italic;
     }
 
     @keyframes text-glow {
@@ -605,12 +728,15 @@ import { environment } from '../../../environments/environment';
 
       .queue-footer {
         padding: 1rem 2rem;
-        flex-wrap: wrap;
-        gap: 1rem;
       }
 
-      .qr-section {
+      .footer-content {
+        gap: 1.5rem;
+      }
+
+      .qr-section-next {
         padding: 0.8rem;
+        margin-top: 1.2rem;
       }
     }
 
@@ -654,6 +780,23 @@ import { environment } from '../../../environments/environment';
         min-height: 150px;
       }
 
+      .waiting-icon {
+        font-size: 2rem;
+      }
+
+      .waiting-title {
+        font-size: 1.5rem;
+      }
+
+      .waiting-subtitle {
+        font-size: 1rem;
+      }
+
+      .qr-section-next.prominent {
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+      }
+
       .performer-item {
         padding: 0.8rem 1rem;
         min-height: 50px;
@@ -681,15 +824,24 @@ import { environment } from '../../../environments/environment';
         padding: 0.8rem 1rem;
       }
 
-      .qr-section {
+      .footer-content {
         flex-direction: column;
-        text-align: center;
         gap: 0.5rem;
-        padding: 0.6rem;
+        text-align: center;
       }
 
-      .qr-label {
-        font-size: 0.9rem;
+      .qr-section-next {
+        margin-top: 1rem;
+        padding: 0.8rem;
+      }
+
+      .qr-section-central {
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+      }
+
+      .qr-label-central {
+        font-size: 1rem;
       }
 
       .tenant-info {
@@ -720,6 +872,7 @@ export class QueueComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private queueService: QueueService,
     private tenantService: TenantService,
     private urlService: UrlService
@@ -737,9 +890,48 @@ export class QueueComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     console.log('QueueComponent inicializado para tenant:', this.tenantId);
     
-    // Cargar datos del tenant
-    this.loadTenantData();
-    
+    // Validar tenant antes de continuar
+    this.validateTenantAndRedirect();
+  }
+
+  /**
+   * Valida que el tenant existe y redirige a screen si es inválido
+   */
+  private validateTenantAndRedirect(): void {
+    // Si no hay tenant ID, redirigir a screen
+    if (!this.tenantId || this.tenantId.trim() === '') {
+      console.log('No tenant ID proporcionado, redirigiendo a screen');
+      this.router.navigate(['/screen']);
+      return;
+    }
+
+    // Cargar datos del tenant y verificar que existe
+    this.tenantService.getTenantDetails(this.tenantId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (tenant) => {
+          if (!tenant) {
+            console.log('Tenant no encontrado:', this.tenantId, 'redirigiendo a screen');
+            this.router.navigate(['/screen']);
+            return;
+          }
+
+          // Tenant válido, continuar con la inicialización
+          this.tenantData = tenant;
+          console.log('Tenant válido, cargando queue:', tenant);
+          this.initializeQueue();
+        },
+        error: (error) => {
+          console.error('Error validando tenant:', error);
+          this.router.navigate(['/screen']);
+        }
+      });
+  }
+
+  /**
+   * Inicializar la cola después de validar el tenant
+   */
+  private initializeQueue(): void {
     // Iniciar polling para obtener las entradas de la cola
     this.queueService.startPolling(this.tenantId, 4000)
       .pipe(takeUntil(this.destroy$))
@@ -887,26 +1079,6 @@ export class QueueComponent implements OnInit, OnDestroy {
    */
   trackByPerformer(index: number, item: QueueEntry): any {
     return item.id || index;
-  }
-
-  /**
-   * Cargar datos del tenant actual
-   */
-  private loadTenantData(): void {
-    console.log('Cargando datos del tenant:', this.tenantId);
-    
-    this.tenantService.getTenantDetails(this.tenantId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (tenant) => {
-          this.tenantData = tenant;
-          console.log('Datos del tenant cargados:', tenant);
-        },
-        error: (error) => {
-          console.error('Error al cargar datos del tenant:', error);
-          // Mantener tenantData como null, se mostrará el tenantId como fallback
-        }
-      });
   }
 
   /**

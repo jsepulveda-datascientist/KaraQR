@@ -185,11 +185,10 @@
           pInputText 
           id="create-id"
           [(ngModel)]="createForm.id"
-          placeholder="Ej: SALA001, BAR_CENTRAL"
+          placeholder="Ej: SALA001, BAR_CENTRAL, venue_1"
           class="w-full"
-          maxlength="20"
-          [style]="{ 'text-transform': 'uppercase' }">
-        <small class="form-help">Solo letras, números, guiones y guiones bajos</small>
+          maxlength="20">
+        <small class="form-help">Solo letras (mayúsculas o minúsculas), números, guiones y guiones bajos</small>
       </div>
 
       <div class="field">
