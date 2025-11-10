@@ -4,6 +4,10 @@ import { AppLayout } from '@/layout/components/app.layout';
 export const appRoutes: Routes = [
     {
         path: '',
+        loadComponent: () => import('@/pages/landing/landing').then((c) => c.Landing)
+    },
+    {
+        path: 'admin',  // Keep admin layout access
         component: AppLayout,
         children: [
             { path: '', redirectTo: '/dashboards', pathMatch: 'full' },
@@ -56,23 +60,19 @@ export const appRoutes: Routes = [
     },
     { path: 'auth', loadChildren: () => import('@/pages/auth/auth.routes') },
     {
-        path: 'landing',
-        loadComponent: () => import('@/pages/landing/landing').then((c) => c.Landing)
-    },
-    {
         path: 'join',
         loadComponent: () => import('@/features/join/join.component').then((c) => c.JoinComponent)
     },
     {
-        path: 'queue',
+        path: 'queue/:tenantId',
         loadComponent: () => import('@/features/queue/queue.component').then((c) => c.QueueComponent)
     },
     {
-        path: 'admin',
+        path: 'remote',  // Renamed from 'admin'
         loadComponent: () => import('@/features/admin/admin.component').then((c) => c.AdminComponent)
     },
     {
-        path: 'screen',
+        path: 'pairing',  // Renamed from 'screen'
         loadComponent: () => import('@/features/screen/screen.component').then((c) => c.ScreenComponent)
     },
     {

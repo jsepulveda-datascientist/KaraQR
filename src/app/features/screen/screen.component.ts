@@ -274,9 +274,8 @@ export class ScreenComponent implements OnInit, OnDestroy {
    */
   goToQueue(): void {
     if (this.pairedTenantId) {
-      this.router.navigate(['/queue'], { 
-        queryParams: { tenant: this.pairedTenantId } 
-      });
+      console.log('🎯 Navigating to queue with tenant:', this.pairedTenantId);
+      this.router.navigate(['/queue', this.pairedTenantId]);
     }
   }
 }

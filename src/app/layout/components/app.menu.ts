@@ -26,9 +26,9 @@ export class AppMenu {
             icon: 'pi pi-fw pi-microphone',
             items: [
                 {
-                    label: 'Pantalla de TV',
+                    label: 'Emparejamiento TV',
                     icon: 'pi pi-fw pi-desktop',
-                    routerLink: ['/screen']
+                    routerLink: ['/pairing']  // Updated from '/screen'
                 },
                 {
                     label: 'Cola de Karaoke',
@@ -36,9 +36,9 @@ export class AppMenu {
                     routerLink: ['/queue']
                 },
                 {
-                    label: 'Panel de Admin',
+                    label: 'Control Remoto',
                     icon: 'pi pi-fw pi-cog',
-                    routerLink: ['/admin']
+                    routerLink: ['/remote']  // Updated from '/admin'
                 },
                 {
                     label: 'Gestión de Tenants',

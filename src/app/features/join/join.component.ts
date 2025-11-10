@@ -566,9 +566,7 @@ export class JoinComponent implements OnInit, OnDestroy {
   }
 
   goToQueue(): void {
-    this.router.navigate(['/queue'], { 
-      queryParams: { tenant: this.tenantId } 
-    });
+    this.router.navigate(['/queue', this.tenantId]); // Updated to use path params instead of query params
   }
 
   onKeyDown(event: KeyboardEvent): void {

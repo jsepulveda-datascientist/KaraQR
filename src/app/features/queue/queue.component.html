@@ -1,0 +1,223 @@
+<!-- Pantalla de Espera / Escenario KaraQR -->
+<div class="queue-screen">
+  
+  <!-- Encabezado -->
+  <header class="queue-header">
+    <div class="header-left">
+      <i class="pi pi-microphone logo-icon"></i>
+      <h1 class="logo-text">KaraQR</h1>
+    </div>
+    <div class="header-center">
+      <span class="tagline">🎤 Tu turno para brillar 🎤</span>
+    </div>
+    <div class="header-right">
+      <div class="tenant-header-info">
+        <img 
+          [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
+          [alt]="tenantData?.display_name || tenantId"
+          class="tenant-header-logo"
+          (error)="onImageError($event)"
+        />
+        <div class="tenant-header-text">
+          <span class="tenant-header-name">{{ tenantData?.display_name || tenantId }}</span>
+          <span class="current-time">{{ now | date:'shortTime' }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="queue-main">
+    
+    <!-- Layout NORMAL cuando NO hay video -->
+    <div class="performers-horizontal-layout">
+      
+      <!-- CANTANTE ACTUAL (Izquierda) -->
+      <section class="current-performer-section">
+        <div class="section-title">
+          <i class="pi pi-star"></i>
+          <span>Cantando Ahora</span>
+        </div>
+        
+        <!-- Si hay cantante actual -->
+        <div class="performer-card" *ngIf="current() as currentSinger; else waitingState">
+          <div class="performer-info">
+            <h2 class="performer-name">{{ currentSinger.name }}</h2>
+            <div class="song-info">
+              <div class="song-details" *ngIf="parseTitle(currentSinger.title_raw || currentSinger.song) as song">
+                <span class="artist" *ngIf="song.artist">{{ song.artist }}</span>
+                <span class="title">{{ song.title }}</span>
+              </div>
+              
+              <!-- Indicador YouTube VISUAL -->
+              <div class="youtube-indicator-visual" *ngIf="currentSinger.youtube_url || extractYouTubeId(currentSinger.title_raw || currentSinger.song)">
+                <i class="fab fa-youtube youtube-icon-large"></i>
+                <span class="youtube-text">Video en reproducción</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Estado de espera -->
+        <ng-template #waitingState>
+          <div class="performer-card waiting-state">
+            <div class="waiting-content">
+              <i class="pi pi-clock waiting-icon"></i>
+              <h2 class="waiting-title">Esperando cantante...</h2>
+              <p class="waiting-subtitle">¡Escanea el código QR para unirte!</p>
+            </div>
+          </div>
+        </ng-template>
+      </section>
+      
+      <!-- DIVISOR VERTICAL -->
+      <div class="vertical-divider"></div>
+      
+      <!-- PRÓXIMOS CANTANTES (Derecha) -->
+      <section class="next-performers-section">
+        <div class="section-title">
+          <i class="pi pi-list"></i>
+          <span>Próximos</span>
+        </div>
+        
+        <!-- Lista de próximos o mensaje vacío -->
+        <div class="performer-card" *ngIf="next().length > 0; else noNextSingers">
+          <div class="performers-list">
+            <div class="performer-item" *ngFor="let entry of next(); let i = index">
+              <span class="position-number">{{ i + 1 }}</span>
+              <div class="performer-details">
+                <span class="name">{{ entry.name }}</span>
+                <span class="song" *ngIf="parseTitle(entry.title_raw || entry.song) as song">
+                  <ng-container *ngIf="song.artist">{{ song.artist }} - </ng-container>{{ song.title }}
+                </span>
+              </div>
+              <i class="fab fa-youtube youtube-indicator" 
+                 *ngIf="entry.youtube_url || extractYouTubeId(entry.title_raw || entry.song)"
+                 title="Tiene video de YouTube">
+              </i>
+            </div>
+          </div>
+          
+          <!-- QR Code - Versión compacta -->
+          <div class="qr-section-next">
+            <qrcode 
+              [qrdata]="joinUrl" 
+              [width]="100" 
+              [errorCorrectionLevel]="'M'">
+            </qrcode>
+            <span class="qr-label">Únete a la cola</span>
+          </div>
+        </div>
+        
+        <!-- Mensaje cuando no hay próximos cantantes -->
+        <ng-template #noNextSingers>
+          <div class="performer-card waiting-state">
+            <div class="waiting-content">
+              <i class="pi pi-users waiting-icon"></i>
+              <h3 class="waiting-title">¡La cola está vacía!</h3>
+              <p class="waiting-subtitle">Sé el primero en unirte</p>
+              
+              <!-- QR Code - Versión prominente -->
+              <div class="qr-section-next prominent">
+                <qrcode 
+                  [qrdata]="joinUrl" 
+                  [width]="140" 
+                  [errorCorrectionLevel]="'M'">
+                </qrcode>
+                <span class="qr-label">Escanea para unirte</span>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer Compacto -->
+  <footer class="queue-footer">
+    <div class="footer-content">
+      <div class="tenant-info">
+        <img 
+          [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
+          [alt]="tenantData?.display_name || tenantId"
+          class="tenant-logo"
+          (error)="onImageError($event)"
+        />
+        <span class="tenant-name">{{ tenantData?.display_name || tenantId }}</span>
+      </div>
+      <span class="powered-by">Powered by KaraQR</span>
+    </div>
+  </footer>
+</div>
+
+<!-- MODO PRESENTACIÓN OVERLAY AUTOMÁTICO -->
+<div class="presentation-overlay" 
+     *ngIf="presentationMode">
+  
+  <!-- Header Mínimo -->
+  <header class="presentation-header">
+    <div class="header-brand">
+      <i class="pi pi-microphone"></i>
+      <span>KaraQR</span>
+    </div>
+    <div class="header-tenant">{{ tenantData?.display_name || tenantId }}</div>
+    <div class="header-time">{{ now | date:'shortTime' }}</div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="presentation-main">
+    
+    <!-- Video Player (75% ancho) -->
+    <div class="presentation-video">
+      <div id="presentation-youtube-player" class="youtube-player-presentation"></div>
+    </div>
+
+    <!-- Panel Lateral (25% ancho) -->
+    <div class="presentation-sidebar">
+      
+      <!-- Cantante Actual -->
+      <div class="presentation-current" *ngIf="current() as currentSinger">
+        <div class="current-badge">Cantando Ahora</div>
+        <h2 class="current-name">{{ currentSinger.name }}</h2>
+        <div class="current-song" *ngIf="parseTitle(currentSinger.title_raw || currentSinger.song) as song">
+          <div class="song-artist" *ngIf="song.artist">{{ song.artist }}</div>
+          <div class="song-title">{{ song.title }}</div>
+        </div>
+      </div>
+
+      <!-- Próximos Cantantes -->
+      <div class="presentation-next">
+        <div class="next-title">Próximos en Cola</div>
+        
+        <div class="next-list" *ngIf="next().length > 0; else noNextInPresentation">
+          <div class="next-performer" *ngFor="let entry of next().slice(0, 8); let i = index">
+            <span class="next-position">{{ i + 1 }}</span>
+            <div class="next-info">
+              <div class="next-name">{{ entry.name }}</div>
+              <div class="next-song" *ngIf="parseTitle(entry.title_raw || entry.song) as song">
+                <ng-container *ngIf="song.artist">{{ song.artist }} - </ng-container>{{ song.title }}
+              </div>
+            </div>
+            <i class="fab fa-youtube next-youtube" 
+               *ngIf="entry.youtube_url || extractYouTubeId(entry.title_raw || entry.song)">
+            </i>
+          </div>
+        </div>
+
+        <ng-template #noNextInPresentation>
+          <div style="text-align: center; color: #9ca3af; padding: 2rem;">
+            <i class="pi pi-users" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+            <div>Cola vacía</div>
+          </div>
+        </ng-template>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer Mínimo -->
+  <footer class="presentation-footer">
+    <span>Powered by KaraQR - Modo Presentación Automático</span>
+  </footer>
+
+</div>
