@@ -645,4 +645,37 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  /**
+   * Volver un elemento terminado a su estado inicial (waiting)
+   */
+  resetCompletedEntry(entry: QueueEntry): void {
+    if (!entry.id || entry.status !== 'done') return;
+
+    if (!confirm(`¿Estás seguro que deseas volver a ${entry.name} a su estado inicial?`)) {
+      return;
+    }
+
+    this.isLoadingAction = true;
+    this.queueService.setStatus(entry.id, 'waiting').subscribe({
+      next: () => {
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Restaurado',
+          detail: `${entry.name} ha sido vuelto a su estado inicial`
+        });
+        this.loadQueueData(); // Recargar la cola
+      },
+      error: (error: any) => {
+        console.error('Error al restaurar entrada:', error);
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo restaurar el elemento'
+        });
+      }
+    });
+  }
 }

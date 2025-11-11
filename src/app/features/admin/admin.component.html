@@ -280,6 +280,16 @@
                 (onClick)="deleteEntry(entry)"
                 pTooltip="Eliminar">
               </p-button>
+
+              <p-button 
+                icon="pi pi-refresh"
+                size="small"
+                severity="info"
+                [outlined]="true"
+                *ngIf="entry.status === 'done'"
+                (onClick)="resetCompletedEntry(entry)"
+                pTooltip="Volver al inicio">
+              </p-button>
             </div>
           </td>
         </tr>
