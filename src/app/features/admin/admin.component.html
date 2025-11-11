@@ -89,9 +89,9 @@
 
   <!-- Controles principales -->
   <div class="control-panel p-4">
-    <h2 class="text-xl font-bold mb-3">Controles Principales</h2>
+    <h2 class="text-xl font-bold mb-3" [ngStyle]="{'font-size': isMobileView ? 'clamp(1rem, 3vw, 1.1rem)' : '1.25rem'}">Controles Principales</h2>
     
-    <div class="controls-grid">
+    <div class="controls-grid" [ngStyle]="getControlsGridStyle()">
       <!-- Llamar siguiente -->
       <div class="control-item">
         <p-button 
@@ -100,6 +100,7 @@
           severity="info"
           size="large"
           class="w-full control-btn"
+          [ngStyle]="getControlButtonStyle()"
           (onClick)="callNext()"
           [disabled]="!canCallNext()"
           [loading]="isLoadingAction">
@@ -114,6 +115,7 @@
           severity="help"
           size="large"
           class="w-full control-btn"
+          [ngStyle]="getControlButtonStyle()"
           (onClick)="togglePause()"
           [disabled]="!getCurrentPerformer()"
           [loading]="isLoadingAction">
@@ -128,6 +130,7 @@
           severity="success"
           size="large"
           class="w-full control-btn"
+          [ngStyle]="getControlButtonStyle()"
           (onClick)="markCurrentDone()"
           [disabled]="!getCurrentPerformer()"
           [loading]="isLoadingAction">
@@ -142,6 +145,7 @@
           severity="secondary"
           size="large"
           class="w-full control-btn"
+          [ngStyle]="getControlButtonStyle()"
           (onClick)="reloadQueue()"
           [loading]="isLoadingAction">
         </p-button>

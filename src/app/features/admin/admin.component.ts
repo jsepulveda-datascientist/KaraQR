@@ -50,6 +50,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   entries: QueueEntry[] = [];
   tenantId: string = '';
   now = new Date();
+  isMobileView = false;
   
   // Control de acceso
   adminPinDialog = true;
@@ -72,6 +73,10 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('AdminComponent inicializado para tenant:', this.tenantId);
+    
+    // Detectar cambios de viewport
+    this.checkMobileView();
+    window.addEventListener('resize', () => this.checkMobileView());
     
     // Verificar si ya tiene PIN guardado
     const savedPin = sessionStorage.getItem('adminPin');
@@ -367,6 +372,85 @@ export class AdminComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  /**
+   * Obtener tamaño de botón según vista
+   */
+  getButtonSize(): 'small' | 'large' {
+    return this.isMobileView ? 'small' : 'large';
+  }
+
+  /**
+   * Detectar si estamos en vista móvil
+   */
+  private checkMobileView(): void {
+    this.isMobileView = window.innerWidth < 768;
+  }
+
+  /**
+   * Obtener estilos dinámicos para grid de controles según viewport
+   */
+  getControlsGridStyle(): any {
+    if (this.isMobileView) {
+      return {
+        'display': 'grid',
+        'grid-template-columns': 'repeat(2, 1fr)',
+        'gap': '0.5rem',
+        'width': '100%',
+        'margin': '0',
+        'padding': '0'
+      };
+    } else if (window.innerWidth < 1024) {
+      return {
+        'display': 'grid',
+        'grid-template-columns': 'repeat(4, 1fr)',
+        'gap': '1rem',
+        'width': '100%',
+        'margin': '0',
+        'padding': '0'
+      };
+    } else {
+      return {
+        'display': 'grid',
+        'grid-template-columns': 'repeat(4, 1fr)',
+        'gap': '1.5rem',
+        'width': '100%',
+        'margin': '0',
+        'padding': '0'
+      };
+    }
+  }
+
+  /**
+   * Obtener estilos dinámicos para botones según viewport
+   */
+  getControlButtonStyle(): any {
+    if (this.isMobileView) {
+      return {
+        'min-height': '2.75rem',
+        'padding': '0.5rem',
+        'width': '100%',
+        'font-size': '0.8rem',
+        'font-weight': '600'
+      };
+    } else if (window.innerWidth < 1024) {
+      return {
+        'min-height': '3.5rem',
+        'padding': '0.75rem',
+        'width': '100%',
+        'font-size': '1rem',
+        'font-weight': '600'
+      };
+    } else {
+      return {
+        'min-height': '4rem',
+        'padding': '1rem',
+        'width': '100%',
+        'font-size': '1.1rem',
+        'font-weight': '600'
+      };
+    }
   }
 
   /**
