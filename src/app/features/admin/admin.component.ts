@@ -40,7 +40,7 @@ import { environment } from '../../../environments/environment';
   ],
   providers: [MessageService],
   templateUrl: './admin.component.html',
-  styleUrl: './admin.component.css'
+  styleUrl: './admin.component.scss'
 })
 export class AdminComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
