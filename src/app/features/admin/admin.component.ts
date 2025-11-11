@@ -62,6 +62,11 @@ export class AdminComponent implements OnInit, OnDestroy {
   isLoadingQueue = false;
   isLoadingAction = false;
 
+  // Dialog para editar YouTube URL
+  editYoutubeDialog = false;
+  selectedEntry: QueueEntry | null = null;
+  youtubeUrlInput = '';
+
   constructor(
     private route: ActivatedRoute,
     private queueService: QueueService,
@@ -559,5 +564,85 @@ export class AdminComponent implements OnInit, OnDestroy {
       case 'done': return 'warning';
       default: return 'secondary';
     }
+  }
+
+  /**
+   * Abrir diálogo para editar URL de YouTube
+   */
+  openEditYoutubeDialog(entry: QueueEntry): void {
+    this.selectedEntry = entry;
+    this.youtubeUrlInput = entry.youtube_url || '';
+    this.editYoutubeDialog = true;
+  }
+
+  /**
+   * Cerrar diálogo de edición
+   */
+  closeEditYoutubeDialog(): void {
+    this.editYoutubeDialog = false;
+    this.selectedEntry = null;
+    this.youtubeUrlInput = '';
+  }
+
+  /**
+   * Validar que la URL sea válida
+   */
+  isValidYoutubeUrl(url: string): boolean {
+    if (!url) return true; // Permitir vacío
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be');
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Guardar URL de YouTube editada
+   */
+  saveYoutubeUrl(): void {
+    if (!this.selectedEntry || !this.selectedEntry.id) return;
+
+    // Validar URL
+    if (!this.isValidYoutubeUrl(this.youtubeUrlInput)) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'URL inválida',
+        detail: 'Por favor ingresa una URL válida de YouTube'
+      });
+      return;
+    }
+
+    this.isLoadingAction = true;
+
+    // Actualizar entrada en la BD
+    const updateData = {
+      ...this.selectedEntry,
+      youtube_url: this.youtubeUrlInput
+    };
+
+    // Usar updateStatus del servicio o hacer llamada directa
+    // Por ahora, vamos a usar una llamada al servicio que actualiza el campo
+    this.queueService.updateYoutubeUrl(this.selectedEntry.id, this.youtubeUrlInput).subscribe({
+      next: () => {
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'URL actualizada',
+          detail: `URL de YouTube actualizada para ${this.selectedEntry?.name}`
+        });
+        this.closeEditYoutubeDialog();
+        this.loadQueueData(); // Recargar la cola
+      },
+      error: (error: any) => {
+        console.error('Error al actualizar URL:', error);
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo actualizar la URL de YouTube'
+        });
+      }
+    });
   }
 }

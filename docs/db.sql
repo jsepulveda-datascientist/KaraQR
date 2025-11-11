@@ -126,3 +126,33 @@ begin
 end$$;
 
 
+-- RLS
+
+- por ahora...
+create policy "tenants_insert_public"
+on public.tenants
+for insert
+to anon
+with check (true);
+
+-- Política completa para UPDATE
+-- Ahora tiene USING + WITH CHECK (lectura + escritura)
+DROP POLICY IF EXISTS "tenants_update_public" ON public.tenants;
+
+CREATE POLICY "tenants_update_public"
+ON public.tenants
+FOR UPDATE
+TO anon
+USING (true)          -- ← Esta línea faltaba
+WITH CHECK (true);
+
+
+
+create policy "queue_delete_public"
+on public.queue for delete to anon
+using (true);
+
+
+
+
+

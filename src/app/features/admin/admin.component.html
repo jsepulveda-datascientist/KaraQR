@@ -263,6 +263,15 @@
               </p-button>
 
               <p-button 
+                icon="pi pi-pencil"
+                size="small"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="openEditYoutubeDialog(entry)"
+                pTooltip="Editar URL de YouTube">
+              </p-button>
+
+              <p-button 
                 icon="pi pi-trash"
                 size="small"
                 severity="danger"
@@ -289,3 +298,70 @@
     </p-table>
   </div>
 </div>
+
+<!-- Dialog para editar URL de YouTube -->
+<p-dialog 
+  header="Editar URL de YouTube"
+  [(visible)]="editYoutubeDialog"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  [style]="{width: '500px'}">
+  
+  <div class="p-4" *ngIf="selectedEntry">
+    <div class="flex align-items-center gap-3 mb-4">
+      <i class="pi pi-pencil text-3xl text-primary"></i>
+      <div>
+        <h3 class="m-0 text-xl font-bold">{{ selectedEntry.name }}</h3>
+        <p class="m-0 text-sm text-color-secondary">{{ selectedEntry.title_raw }}</p>
+      </div>
+    </div>
+    
+    <div class="field">
+      <label for="youtube-url" class="block mb-2 font-semibold">URL de YouTube</label>
+      <input 
+        pInputText 
+        id="youtube-url"
+        [(ngModel)]="youtubeUrlInput"
+        placeholder="https://www.youtube.com/watch?v=..."
+        class="w-full"
+        type="text">
+      <small class="block mt-2 text-color-secondary">
+        Ingresa la URL completa de YouTube o déjala vacía
+      </small>
+      
+      <!-- Mostrar URL actual si existe -->
+      <div class="mt-3" *ngIf="selectedEntry.youtube_url">
+        <p class="text-sm mb-2">
+          <strong>URL actual:</strong>
+          <a [href]="selectedEntry.youtube_url" target="_blank" class="text-primary break-words">
+            {{ selectedEntry.youtube_url }}
+          </a>
+        </p>
+      </div>
+    </div>
+    
+    <div class="flex flex-column gap-2 mt-4">
+      <p-button 
+        label="Guardar"
+        icon="pi pi-check"
+        severity="success"
+        (onClick)="saveYoutubeUrl()"
+        [disabled]="!isValidYoutubeUrl(youtubeUrlInput)"
+        [loading]="isLoadingAction"
+        class="w-full">
+      </p-button>
+      
+      <p-button 
+        label="Cancelar"
+        icon="pi pi-times"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="closeEditYoutubeDialog()"
+        class="w-full">
+      </p-button>
+    </div>
+  </div>
+</p-dialog>

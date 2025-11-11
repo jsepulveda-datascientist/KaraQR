@@ -295,6 +295,34 @@ export class QueueService implements OnDestroy {
   }
 
   /**
+   * Actualizar la URL de YouTube de una entrada
+   */
+  updateYoutubeUrl(id: string | number, youtubeUrl: string): Observable<QueueEntry> {
+    return from(
+      (this.supabaseService.client as any)
+        .from('queue')
+        .update({ youtube_url: youtubeUrl })
+        .eq('id', id)
+        .select()
+        .single()
+    ).pipe(
+      map(({ data, error }: any) => {
+        if (error) {
+          console.error('Error al actualizar YouTube URL:', error);
+          throw error;
+        }
+        console.log('YouTube URL actualizada:', data);
+        this.loadQueue(); // Refrescar la cola
+        return data;
+      }),
+      catchError((error) => {
+        console.error('Error en updateYoutubeUrl:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
    * Llamar al siguiente en la cola (RPC)
    * Pasa performing→done y primer waiting→performing
    */
