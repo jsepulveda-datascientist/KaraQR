@@ -215,7 +215,7 @@ export class QueueService implements OnDestroy {
   /**
    * Eliminar entrada de la cola
    */
-  remove(id: number): Observable<boolean> {
+  remove(id: string | number): Observable<boolean> {
     return from(
       (this.supabaseService.client as any)
         .from('queue')

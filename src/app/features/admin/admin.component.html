@@ -150,6 +150,21 @@
           [loading]="isLoadingAction">
         </p-button>
       </div>
+
+      <!-- Limpiar terminados -->
+      <div class="control-item">
+        <p-button 
+          label="Limpiar Terminados"
+          icon="pi pi-trash"
+          severity="danger"
+          size="large"
+          class="w-full control-btn"
+          [ngStyle]="getControlButtonStyle()"
+          (onClick)="clearCompletedEntries()"
+          [disabled]="!hasCompletedEntries()"
+          [loading]="isLoadingAction">
+        </p-button>
+      </div>
     </div>
   </div>
 
@@ -245,6 +260,16 @@
                 (onClick)="markDone(entry)"
                 [disabled]="entry.status === 'done'"
                 pTooltip="Marcar como hecho">
+              </p-button>
+
+              <p-button 
+                icon="pi pi-trash"
+                size="small"
+                severity="danger"
+                [outlined]="true"
+                *ngIf="entry.status === 'done'"
+                (onClick)="deleteEntry(entry)"
+                pTooltip="Eliminar">
               </p-button>
             </div>
           </td>

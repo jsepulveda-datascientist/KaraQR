@@ -375,6 +375,88 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Verificar si hay elementos terminados para limpiar
+   */
+  hasCompletedEntries(): boolean {
+    return this.entries && this.entries.length > 0 && this.entries.some(e => e.status === 'done');
+  }
+  clearCompletedEntries(): void {
+    const completedCount = this.entries.filter(e => e.status === 'done').length;
+    
+    if (completedCount === 0) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'No hay elementos',
+        detail: 'No hay elementos terminados para eliminar'
+      });
+      return;
+    }
+
+    // Confirmar antes de eliminar
+    if (!confirm(`¿Estás seguro? Se eliminarán ${completedCount} elementos terminados.`)) {
+      return;
+    }
+
+    this.isLoadingAction = true;
+
+    // Usar método del servicio para limpiar completadas
+    this.queueService.clearCompleted().subscribe({
+      next: () => {
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: `${completedCount} eliminados`,
+          detail: `Se eliminaron ${completedCount} elementos terminados de la cola`,
+          life: 3000
+        });
+        this.loadQueueData(); // Recargar la cola
+      },
+      error: (error: any) => {
+        console.error('Error al eliminar entradas:', error);
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo eliminar los elementos terminados'
+        });
+      }
+    });
+  }
+
+  /**
+   * Eliminar un elemento individual de la cola
+   */
+  deleteEntry(entry: QueueEntry): void {
+    if (!entry.id) return;
+
+    if (!confirm(`¿Estás seguro que deseas eliminar a ${entry.name}?`)) {
+      return;
+    }
+
+    this.isLoadingAction = true;
+    this.queueService.remove(entry.id).subscribe({
+      next: () => {
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Eliminado',
+          detail: `${entry.name} fue eliminado de la cola`
+        });
+        this.loadQueueData(); // Recargar la cola
+      },
+      error: (error: any) => {
+        console.error('Error al eliminar entrada:', error);
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo eliminar el elemento'
+        });
+      }
+    });
+  }
+
+  /**
    * Obtener tamaño de botón según vista
    */
   getButtonSize(): 'small' | 'large' {
