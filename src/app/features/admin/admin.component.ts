@@ -234,6 +234,13 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Obtener el artista llamado a escena
+   */
+  getCalledPerformer(): QueueEntry | null {
+    return this.entries.find(entry => entry.status === 'called') || null;
+  }
+
+  /**
    * Verificar si se puede llamar al siguiente
    */
   canCallNext(): boolean {

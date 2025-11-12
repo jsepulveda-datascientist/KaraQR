@@ -96,7 +96,9 @@
     <!-- Columna izquierda: Estado Actual -->
     <div class="state-column">
       <h2 class="text-xl font-bold mb-3">Estado Actual</h2>
-      <div class="current-performer-card p-3 border-round-lg surface-ground" *ngIf="getCurrentPerformer() as current; else noPerformer">
+      
+      <!-- Artista en estado performing -->
+      <div class="current-performer-card p-3 border-round-lg surface-ground" *ngIf="getCurrentPerformer() as current; else checkCalled">
         <div class="flex align-items-center gap-3">
           <i class="pi pi-microphone text-4xl text-primary"></i>
           <div class="flex-1">
@@ -115,6 +117,35 @@
           </p-tag>
         </div>
       </div>
+
+      <!-- Artista en estado called (si no hay performing) -->
+      <ng-template #checkCalled>
+        <div class="current-performer-card called-state p-3 border-round-lg surface-ground" *ngIf="getCalledPerformer() as called; else noPerformer">
+          <div class="flex align-items-center gap-3">
+            <i class="pi pi-bell text-4xl text-accent"></i>
+            <div class="flex-1">
+              <div class="called-badge mb-2">
+                <i class="pi pi-bell-outline mr-2"></i>
+                LLAMADO A ESCENA
+              </div>
+              <h3 class="m-0 text-lg font-bold">{{ called.name }}</h3>
+              <p class="m-0 text-color-secondary">{{ called.title_raw }}</p>
+              <div class="mt-2" *ngIf="called.youtube_url">
+                <a [href]="called.youtube_url" target="_blank" class="text-sm text-primary">
+                  <i class="pi pi-youtube mr-1"></i>Ver en YouTube
+                </a>
+              </div>
+            </div>
+            <p-tag 
+              [value]="getStatusText(called.status)" 
+              [severity]="getStatusSeverity(called.status)"
+              class="text-lg">
+            </p-tag>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Sin performer -->
       <ng-template #noPerformer>
         <div class="empty-state">
           <i class="pi pi-inbox text-4xl mb-2 text-color-secondary"></i>
