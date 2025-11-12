@@ -99,7 +99,7 @@
       
       <!-- Artista en estado performing -->
       <div class="current-performer-card p-3 border-round-lg surface-ground" *ngIf="getCurrentPerformer() as current; else checkCalled">
-        <div class="flex align-items-center gap-3">
+        <div class="performer-info flex align-items-center gap-3">
           <i class="pi pi-microphone text-4xl text-primary"></i>
           <div class="flex-1">
             <h3 class="m-0 text-lg font-bold">{{ current.name }}</h3>
@@ -116,12 +116,43 @@
             class="text-lg">
           </p-tag>
         </div>
+        
+        <!-- Botones de control en la parte inferior -->
+        <div class="performer-controls" style="border-top: 1px solid rgba(99, 102, 241, 0.2);">
+          <p-button 
+            icon="pi pi-play"
+            severity="success"
+            [outlined]="true"
+            size="small"
+            (onClick)="startPerformance(current)"
+            [disabled]="current.status !== 'called'"
+            pTooltip="Iniciar performance">
+          </p-button>
+          <p-button 
+            icon="pi pi-pause"
+            severity="secondary"
+            [outlined]="true"
+            size="small"
+            (onClick)="togglePause()"
+            [disabled]="current.status !== 'performing'"
+            pTooltip="Pausar/Reanudar">
+          </p-button>
+          <p-button 
+            icon="pi pi-forward"
+            severity="info"
+            [outlined]="true"
+            size="small"
+            (onClick)="callNext()"
+            [disabled]="!canCallNext()"
+            pTooltip="Siguiente">
+          </p-button>
+        </div>
       </div>
 
       <!-- Artista en estado called (si no hay performing) -->
       <ng-template #checkCalled>
         <div class="current-performer-card called-state p-3 border-round-lg surface-ground" *ngIf="getCalledPerformer() as called; else noPerformer">
-          <div class="flex align-items-center gap-3">
+          <div class="performer-info flex align-items-center gap-3">
             <i class="pi pi-bell text-4xl text-accent"></i>
             <div class="flex-1">
               <div class="called-badge mb-2">
@@ -136,6 +167,37 @@
                 </a>
               </div>
             </div>
+          </div>
+          
+          <!-- Botones de control en la parte inferior -->
+          <div class="performer-controls" style="border-top: 1px solid rgba(245, 158, 11, 0.2);">
+            <p-button 
+              icon="pi pi-play"
+              severity="success"
+              [outlined]="true"
+              size="small"
+              (onClick)="startPerformance(called)"
+              [disabled]="called.status !== 'called'"
+              pTooltip="Iniciar performance">
+            </p-button>
+            <p-button 
+              icon="pi pi-pause"
+              severity="secondary"
+              [outlined]="true"
+              size="small"
+              (onClick)="togglePause()"
+              [disabled]="called.status !== 'performing'"
+              pTooltip="Pausar/Reanudar">
+            </p-button>
+            <p-button 
+              icon="pi pi-forward"
+              severity="info"
+              [outlined]="true"
+              size="small"
+              (onClick)="callNext()"
+              [disabled]="!canCallNext()"
+              pTooltip="Siguiente">
+            </p-button>
           </div>
         </div>
       </ng-template>
