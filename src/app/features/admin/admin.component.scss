@@ -47,6 +47,39 @@
   }
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tenant-avatar {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--brand-primary);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+.tenant-header-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.tenant-header-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.header-time {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
 .control-panel,
 .current-state,
 .queue-table {
@@ -223,6 +256,31 @@
 @media (max-width: 768px) {
   .admin-header {
     padding: 1rem;
+  }
+
+  .admin-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .admin-header .pi {
+    font-size: 1.875rem;
+  }
+
+  .header-right {
+    gap: 0.5rem;
+  }
+
+  .tenant-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .tenant-header-name {
+    font-size: 0.875rem;
+  }
+
+  .header-time {
+    font-size: 0.75rem;
   }
 
   .control-panel,

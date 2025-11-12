@@ -70,11 +70,22 @@
         <i class="pi pi-cog text-4xl text-primary"></i>
         <div>
           <h1 class="m-0 text-3xl font-bold">Admin KaraQR</h1>
-          <p class="m-0 text-sm text-color-secondary">Control remoto para {{ tenantId }}</p>
+          <p class="m-0 text-sm text-color-secondary">Control remoto para {{ tenantData?.display_name || tenantId }}</p>
         </div>
       </div>
       
-      <span class="text-sm text-color-secondary">{{ now | date:'shortTime' }}</span>
+      <div class="header-right">
+        <img 
+          [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
+          [alt]="tenantData?.display_name || tenantId"
+          class="tenant-avatar"
+          onerror="this.src='/layout/images/logo/logo.png'"
+        />
+        <div class="tenant-header-info">
+          <span class="tenant-header-name">{{ tenantData?.display_name || tenantId }}</span>
+          <span class="header-time">{{ now | date:'shortTime' }}</span>
+        </div>
+      </div>
     </div>
   </div>
 
