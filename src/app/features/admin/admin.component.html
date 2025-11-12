@@ -75,125 +75,132 @@
       </div>
       
       <div class="header-right">
+        <div class="tenant-header-info">
+          <span class="tenant-header-name">{{ tenantData?.display_name || tenantId }}</span>
+          <span class="header-time">{{ now | date:'shortTime' }}</span>
+        </div>
         <img 
           [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
           [alt]="tenantData?.display_name || tenantId"
           class="tenant-avatar"
           onerror="this.src='/layout/images/logo/logo.png'"
         />
-        <div class="tenant-header-info">
-          <span class="tenant-header-name">{{ tenantData?.display_name || tenantId }}</span>
-          <span class="header-time">{{ now | date:'shortTime' }}</span>
-        </div>
       </div>
     </div>
   </div>
 
   <p-divider></p-divider>
 
-  <!-- Controles principales -->
-  <div class="control-panel p-4">
-    <h2 class="text-xl font-bold mb-3" [ngStyle]="{'font-size': isMobileView ? 'clamp(1rem, 3vw, 1.1rem)' : '1.25rem'}">Controles Principales</h2>
-    
-    <div class="controls-grid" [ngStyle]="getControlsGridStyle()">
-      <!-- Llamar siguiente -->
-      <div class="control-item">
-        <p-button 
-          label="Siguiente"
-          icon="pi pi-forward"
-          severity="info"
-          size="large"
-          class="w-full control-btn"
-          [ngStyle]="getControlButtonStyle()"
-          (onClick)="callNext()"
-          [disabled]="!canCallNext()"
-          [loading]="isLoadingAction">
-        </p-button>
-      </div>
-
-      <!-- Pausar/Retomar -->
-      <div class="control-item">
-        <p-button 
-          [label]="getCurrentPerformer()?.status === 'performing' ? 'Pausar' : 'Retomar'"
-          icon="pi pi-pause"
-          severity="help"
-          size="large"
-          class="w-full control-btn"
-          [ngStyle]="getControlButtonStyle()"
-          (onClick)="togglePause()"
-          [disabled]="!getCurrentPerformer()"
-          [loading]="isLoadingAction">
-        </p-button>
-      </div>
-
-      <!-- Marcar como hecho -->
-      <div class="control-item">
-        <p-button 
-          label="Finalizado"
-          icon="pi pi-check"
-          severity="success"
-          size="large"
-          class="w-full control-btn"
-          [ngStyle]="getControlButtonStyle()"
-          (onClick)="markCurrentDone()"
-          [disabled]="!getCurrentPerformer()"
-          [loading]="isLoadingAction">
-        </p-button>
-      </div>
-
-      <!-- Recargar vista -->
-      <div class="control-item">
-        <p-button 
-          label="Recargar"
-          icon="pi pi-refresh"
-          severity="secondary"
-          size="large"
-          class="w-full control-btn"
-          [ngStyle]="getControlButtonStyle()"
-          (onClick)="reloadQueue()"
-          [loading]="isLoadingAction">
-        </p-button>
-      </div>
-
-      <!-- Limpiar terminados -->
-      <div class="control-item">
-        <p-button 
-          label="Limpiar Terminados"
-          icon="pi pi-trash"
-          severity="danger"
-          size="large"
-          class="w-full control-btn"
-          [ngStyle]="getControlButtonStyle()"
-          (onClick)="clearCompletedEntries()"
-          [disabled]="!hasCompletedEntries()"
-          [loading]="isLoadingAction">
-        </p-button>
-      </div>
-    </div>
-  </div>
-
-  <p-divider></p-divider>
-
-  <!-- Estado actual -->
-  <div class="current-state p-4" *ngIf="getCurrentPerformer() as current">
-    <h2 class="text-xl font-bold mb-3">Estado Actual</h2>
-    <div class="current-performer-card p-3 border-round-lg surface-ground">
-      <div class="flex align-items-center gap-3">
-        <i class="pi pi-microphone text-4xl text-primary"></i>
-        <div class="flex-1">
-          <h3 class="m-0 text-lg font-bold">{{ current.name }}</h3>
-          <p class="m-0 text-color-secondary">{{ current.title_raw }}</p>
-          <div class="mt-2" *ngIf="current.youtube_url">
-            <a [href]="current.youtube_url" target="_blank" class="text-sm text-primary">
-              <i class="pi pi-youtube mr-1"></i>Ver en YouTube
-            </a>
+  <!-- Layout de dos columnas: Estado Actual + Controles Principales -->
+  <div class="admin-content-layout p-4">
+    <!-- Columna izquierda: Estado Actual -->
+    <div class="state-column">
+      <h2 class="text-xl font-bold mb-3">Estado Actual</h2>
+      <div class="current-performer-card p-3 border-round-lg surface-ground" *ngIf="getCurrentPerformer() as current; else noPerformer">
+        <div class="flex align-items-center gap-3">
+          <i class="pi pi-microphone text-4xl text-primary"></i>
+          <div class="flex-1">
+            <h3 class="m-0 text-lg font-bold">{{ current.name }}</h3>
+            <p class="m-0 text-color-secondary">{{ current.title_raw }}</p>
+            <div class="mt-2" *ngIf="current.youtube_url">
+              <a [href]="current.youtube_url" target="_blank" class="text-sm text-primary">
+                <i class="pi pi-youtube mr-1"></i>Ver en YouTube
+              </a>
+            </div>
           </div>
+          <p-tag 
+            [value]="getStatusText(current.status)" 
+            [severity]="getStatusSeverity(current.status)"
+            class="text-lg">
+          </p-tag>
         </div>
-        <p-tag 
-          [value]="getStatusText(current.status)" 
-          [severity]="getStatusSeverity(current.status)"
-          class="text-lg">
-        </p-tag>
+      </div>
+      <ng-template #noPerformer>
+        <div class="empty-state">
+          <i class="pi pi-inbox text-4xl mb-2 text-color-secondary"></i>
+          <p class="text-color-secondary">No hay performer activo</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Columna derecha: Controles Principales -->
+    <div class="controls-column">
+      <h2 class="text-xl font-bold mb-3">Controles Principales</h2>
+      
+      <div class="controls-grid" [ngStyle]="getControlsGridStyle()">
+        <!-- Llamar siguiente -->
+        <div class="control-item">
+          <p-button 
+            label="Siguiente"
+            icon="pi pi-forward"
+            severity="info"
+            size="large"
+            class="w-full control-btn"
+            [ngStyle]="getControlButtonStyle()"
+            (onClick)="callNext()"
+            [disabled]="!canCallNext()"
+            [loading]="isLoadingAction">
+          </p-button>
+        </div>
+
+        <!-- Pausar/Retomar -->
+        <div class="control-item">
+          <p-button 
+            [label]="getCurrentPerformer()?.status === 'performing' ? 'Pausar' : 'Retomar'"
+            icon="pi pi-pause"
+            severity="help"
+            size="large"
+            class="w-full control-btn"
+            [ngStyle]="getControlButtonStyle()"
+            (onClick)="togglePause()"
+            [disabled]="!getCurrentPerformer()"
+            [loading]="isLoadingAction">
+          </p-button>
+        </div>
+
+        <!-- Marcar como hecho -->
+        <div class="control-item">
+          <p-button 
+            label="Finalizado"
+            icon="pi pi-check"
+            severity="success"
+            size="large"
+            class="w-full control-btn"
+            [ngStyle]="getControlButtonStyle()"
+            (onClick)="markCurrentDone()"
+            [disabled]="!getCurrentPerformer()"
+            [loading]="isLoadingAction">
+          </p-button>
+        </div>
+
+        <!-- Recargar vista -->
+        <div class="control-item">
+          <p-button 
+            label="Recargar"
+            icon="pi pi-refresh"
+            severity="secondary"
+            size="large"
+            class="w-full control-btn"
+            [ngStyle]="getControlButtonStyle()"
+            (onClick)="reloadQueue()"
+            [loading]="isLoadingAction">
+          </p-button>
+        </div>
+
+        <!-- Limpiar terminados -->
+        <div class="control-item">
+          <p-button 
+            label="Limpiar Terminados"
+            icon="pi pi-trash"
+            severity="danger"
+            size="large"
+            class="w-full control-btn"
+            [ngStyle]="getControlButtonStyle()"
+            (onClick)="clearCompletedEntries()"
+            [disabled]="!hasCompletedEntries()"
+            [loading]="isLoadingAction">
+          </p-button>
+        </div>
       </div>
     </div>
   </div>
