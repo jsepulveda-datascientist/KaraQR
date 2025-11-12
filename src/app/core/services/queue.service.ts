@@ -377,6 +377,33 @@ export class QueueService implements OnDestroy {
   }
 
   /**
+   * Iniciar performance (RPC)
+   * Inicia la performance del artista en escena
+   */
+  startPerformance(tenantId: string): Observable<any> {
+    console.log('Ejecutando startPerformance para tenant:', tenantId);
+    return from(
+      (this.supabaseService.client as any).rpc('karaqr_start_performance', { 
+        p_tenant: tenantId 
+      })
+    ).pipe(
+      map(({ data, error }: any) => {
+        if (error) {
+          console.error('Error en startPerformance RPC:', error);
+          throw error;
+        }
+        console.log('StartPerformance ejecutado exitosamente:', data);
+        this.loadQueue(); // Refrescar la cola
+        return data;
+      }),
+      catchError((error) => {
+        console.error('Error en startPerformance:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
    * Suscripción a cambios en tiempo real para un tenant específico
    */
   subscribeRealtime(tenantId: string, onAnyChange: () => void): void {

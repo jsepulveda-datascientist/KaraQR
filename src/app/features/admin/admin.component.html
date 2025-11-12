@@ -253,14 +253,16 @@
           </td>
           <td>
             <div class="flex gap-1">
+              <!-- Llamar a escena / Iniciar Performance -->
               <p-button 
-                icon="pi pi-play"
+                [icon]="entry.status === 'called' ? 'pi pi-play' : 'pi pi-headphones'"
+                [label]="entry.status === 'called' ? 'Iniciar' : ''"
                 size="small"
-                severity="success"
+                [severity]="entry.status === 'called' ? 'success' : 'info'"
                 [outlined]="true"
-                (onClick)="setPerforming(entry)"
+                (onClick)="entry.status === 'called' ? startPerformance(entry) : setPerforming(entry)"
                 [disabled]="entry.status === 'performing' || entry.status === 'done'"
-                pTooltip="Poner en escena">
+                [pTooltip]="entry.status === 'called' ? 'Iniciar performance' : 'Llamar a escena'">
               </p-button>
               
               <p-button 

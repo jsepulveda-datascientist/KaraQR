@@ -358,6 +358,34 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Iniciar performance del cantante
+   */
+  startPerformance(entry: QueueEntry): void {
+    if (!entry.id) return;
+    
+    this.isLoadingAction = true;
+    this.queueService.startPerformance(this.tenantId).subscribe({
+      next: () => {
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Performance iniciado',
+          detail: `${entry.name} ha iniciado su performance`
+        });
+      },
+      error: (error) => {
+        console.error('Error al iniciar performance:', error);
+        this.isLoadingAction = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo iniciar el performance'
+        });
+      }
+    });
+  }
+
+  /**
    * Marcar cantante como terminado
    */
   markDone(entry: QueueEntry): void {
