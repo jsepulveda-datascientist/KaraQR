@@ -1,14 +1,12 @@
 <div class="join-container p-fluid">
-  <p-card 
-    header="🎤 Anótate para cantar" 
-    [style]="{width: '100%', 'max-width': '480px', margin: '0 auto'}"
-    styleClass="join-card">
-    
+  
+  <!-- Formulario de inscripción -->
+  <p-card header="🎤 Anótate para cantar" *ngIf="!showConfirmation" styleClass="join-card">
     <form [formGroup]="joinForm" (ngSubmit)="onSubmit()" (keydown)="onKeyDown($event)" novalidate>
       
       <!-- Campo Nombre -->
       <div class="field">
-        <label for="name" class="block text-900 font-medium mb-2">
+        <label for="name" class="block font-medium mb-2">
           Nombre *
         </label>
         <input 
@@ -18,15 +16,11 @@
           placeholder="Ingresa tu nombre"
           class="w-full"
           [class.ng-invalid]="hasFieldError('name', 'required') || hasFieldError('name', 'minlength')"
-          [attr.aria-invalid]="hasFieldError('name', 'required') || hasFieldError('name', 'minlength')"
-          [attr.aria-describedby]="hasFieldError('name', 'required') || hasFieldError('name', 'minlength') ? 'name-error' : null"
           autocomplete="given-name"
         />
         <small 
-          id="name-error" 
           class="p-error block mt-1" 
           *ngIf="hasFieldError('name', 'required') || hasFieldError('name', 'minlength')"
-          role="alert"
         >
           {{ getFieldErrorMessage('name') }}
         </small>
@@ -34,40 +28,50 @@
 
       <!-- Campo Canción -->
       <div class="field">
-        <label for="song" class="block text-900 font-medium mb-2">
-          Canción *
+        <label for="song" class="block font-medium mb-2">
+          Canción (Artista - Tema) *
         </label>
-        <p-autoComplete
-          inputId="song"
+        <input 
+          pInputText 
+          id="song"
           formControlName="song"
-          [suggestions]="filteredSongs"
-          (completeMethod)="completeSongs($event)"
-          placeholder="Busca o selecciona una canción"
-          [dropdown]="true"
-          appendTo="body"
-          [style]="{width: '100%'}"
-          [class.ng-invalid]="hasFieldError('song', 'required')"
-          [attr.aria-invalid]="hasFieldError('song', 'required')"
-          [attr.aria-describedby]="hasFieldError('song', 'required') ? 'song-error' : null"
-          optionLabel="value"
-          [forceSelection]="false"
-          [minLength]="2"
-          [delay]="300"
-          emptyMessage="No se encontraron canciones"
-          loadingIcon="pi pi-spinner pi-spin"
-        >
-        </p-autoComplete>
+          placeholder="Ej: Queen - Bohemian Rhapsody"
+          class="w-full"
+          [class.ng-invalid]="hasFieldError('song', 'required') || hasFieldError('song', 'minlength')"
+        />
         <small 
-          id="song-error" 
           class="p-error block mt-1" 
-          *ngIf="hasFieldError('song', 'required')"
-          role="alert"
+          *ngIf="hasFieldError('song', 'required') || hasFieldError('song', 'minlength')"
         >
           {{ getFieldErrorMessage('song') }}
         </small>
       </div>
 
-      <!-- Botón de Submit -->
+      <!-- Campo YouTube Link (opcional) -->
+      <div class="field">
+        <label for="youtubeLink" class="block font-medium mb-2">
+          Link de YouTube (opcional pero recomendable)
+        </label>
+        <input 
+          pInputText 
+          id="youtubeLink"
+          formControlName="youtubeLink"
+          placeholder="https://www.youtube.com/watch?v=..."
+          class="w-full"
+          [class.ng-invalid]="hasFieldError('youtubeLink', 'invalidUrl')"
+        />
+        <small 
+          class="p-error block mt-1" 
+          *ngIf="hasFieldError('youtubeLink', 'invalidUrl')"
+        >
+          {{ getFieldErrorMessage('youtubeLink') }}
+        </small>
+        <small class="text-500 block mt-1" *ngIf="!hasFieldError('youtubeLink', 'invalidUrl')">
+          Si tienes una versión específica que prefieres
+        </small>
+      </div>
+
+      <!-- Botón Submit -->
       <div class="field mt-4">
         <button 
           pButton 
@@ -77,7 +81,7 @@
           [disabled]="joinForm.invalid || joinForm.pristine || isSubmitting"
           [loading]="isSubmitting"
           loadingIcon="pi pi-spinner pi-spin"
-          [attr.aria-label]="isSubmitting ? 'Procesando registro...' : 'Anotarse para cantar'"
+          (click)="onButtonClick($event)"
         >
         </button>
       </div>
@@ -85,27 +89,77 @@
     </form>
 
     <!-- Footer con información del tenant -->
-    <ng-container pTemplate="footer">
-      <div class="text-center">
-        <small class="text-500">
-          <i class="pi pi-qrcode mr-1"></i>
-          Escaneado para <strong>{{ tenantId }}</strong>
-        </small>
-      </div>
-    </ng-container>
+    <div class="tenant-footer">
+      <small class="text-500">
+        <i class="pi pi-qrcode mr-1"></i>
+        Escaneado para <strong>{{ tenantId }}</strong>
+      </small>
+    </div>
 
   </p-card>
 
-  <!-- Toast para feedback -->
-  <p-toast 
-    position="top-center"
-    [style]="{marginTop: '80px'}"
-    [life]="5000"
-    [showTransformOptions]="'translateY(-100%)'"
-    [hideTransformOptions]="'translateY(-100%)'"
-    [showTransitionOptions]="'300ms ease-out'"
-    [hideTransitionOptions]="'250ms ease-in'"
-  >
-  </p-toast>
+  <!-- Pantalla de confirmación -->
+  <p-card *ngIf="showConfirmation" class="confirmation-card">
+    <div class="confirmation-content">
+      
+      <!-- Ícono de éxito -->
+      <div class="success-icon">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      
+      <!-- Mensaje principal -->
+      <h2 class="confirmation-title">¡Listo para cantar! 🎤</h2>
+      <p class="confirmation-message">
+        Te has anotado exitosamente en la cola de karaoke
+      </p>
+      
+      <!-- Detalles de la inscripción -->
+      <div class="inscription-details">
+        <div class="detail-item">
+          <i class="pi pi-user detail-icon"></i>
+          <span class="detail-label">Cantante:</span>
+          <span class="detail-value">{{ submittedData?.name }}</span>
+        </div>
+        
+        <div class="detail-item">
+          <i class="pi pi-music detail-icon"></i>
+          <span class="detail-label">Canción:</span>
+          <span class="detail-value">{{ submittedData?.song }}</span>
+        </div>
+        
+        <div class="detail-item" *ngIf="submittedData?.youtubeLink">
+          <i class="pi pi-youtube detail-icon"></i>
+          <span class="detail-label">YouTube:</span>
+          <span class="detail-value">Link incluido</span>
+        </div>
+      </div>
+      
+      <!-- Información adicional -->
+      <div class="info-message">
+        <i class="pi pi-info-circle mr-2"></i>
+        Te avisaremos cuando sea tu turno. ¡Mantente atento!
+      </div>
+      
+      <!-- Botones de acción -->
+      <div class="action-buttons">
+        <button 
+          pButton 
+          label="🎵 Anotar otra canción"
+          class="p-button-outlined w-full mb-2"
+          (click)="requestAnotherSong()"
+        ></button>
+        
+        <button 
+          pButton 
+          label="📋 Ver la cola"
+          class="p-button-secondary w-full"
+          (click)="goToQueue()"
+        ></button>
+      </div>
+      
+    </div>
+  </p-card>
 
+  <!-- Toast para errores solamente -->
+  <p-toast position="top-center" [life]="5000"></p-toast>
 </div>

@@ -12,16 +12,16 @@
     </div>
     <div class="header-right">
       <div class="tenant-header-info">
+        <div class="tenant-header-text">
+          <span class="tenant-header-name">{{ tenantData?.display_name || tenantId }}</span>
+          <span class="current-time">{{ now | date:'shortTime' }}</span>
+        </div>
         <img 
           [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
           [alt]="tenantData?.display_name || tenantId"
           class="tenant-header-logo"
           (error)="onImageError($event)"
         />
-        <div class="tenant-header-text">
-          <span class="tenant-header-name">{{ tenantData?.display_name || tenantId }}</span>
-          <span class="current-time">{{ now | date:'shortTime' }}</span>
-        </div>
       </div>
     </div>
   </header>

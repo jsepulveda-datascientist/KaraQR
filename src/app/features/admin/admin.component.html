@@ -129,12 +129,12 @@
             pTooltip="Iniciar performance">
           </p-button>
           <p-button 
-            icon="pi pi-stop-circle"
+            icon="pi pi-stop"
             severity="danger"
             [outlined]="true"
             size="small"
             (onClick)="markDone(current)"
-            [disabled]="current.status !== 'performing'"
+            [disabled]="current.status !== 'performing' && current.status !== 'called'"
             pTooltip="Marcar como terminada">
           </p-button>
           <p-button 
@@ -181,12 +181,12 @@
               pTooltip="Iniciar performance">
             </p-button>
             <p-button 
-              icon="pi pi-stop-circle"
+              icon="pi pi-stop"
               severity="danger"
               [outlined]="true"
               size="small"
               (onClick)="markDone(called)"
-              [disabled]="called.status !== 'performing'"
+              [disabled]="called.status !== 'performing' && called.status !== 'called'"
               pTooltip="Marcar como terminada">
             </p-button>
             <p-button 
@@ -205,8 +205,19 @@
       <!-- Sin performer -->
       <ng-template #noPerformer>
         <div class="empty-state">
-          <i class="pi pi-inbox text-4xl mb-2 text-color-secondary"></i>
-          <p class="text-color-secondary">No hay performer activo</p>
+          <i class="pi pi-inbox text-4xl mb-3 text-color-secondary"></i>
+          <p class="text-color-secondary mb-3">No hay performer activo</p>
+          <div class="performer-controls" style="border-top: none; padding-top: 0; margin-top: 1rem;">
+            <p-button 
+              icon="pi pi-step-forward"
+              severity="info"
+              [outlined]="true"
+              size="small"
+              (onClick)="callNext()"
+              [disabled]="!canCallNext()"
+              pTooltip="Llamar al siguiente">
+            </p-button>
+          </div>
         </div>
       </ng-template>
     </div>
@@ -227,21 +238,6 @@
             [ngStyle]="getControlButtonStyle()"
             (onClick)="callNext()"
             [disabled]="!canCallNext()"
-            [loading]="isLoadingAction">
-          </p-button>
-        </div>
-
-        <!-- Pausar/Retomar -->
-        <div class="control-item">
-          <p-button 
-            [label]="getCurrentPerformer()?.status === 'performing' ? 'Pausar' : 'Retomar'"
-            icon="pi pi-pause"
-            severity="help"
-            size="large"
-            class="w-full control-btn"
-            [ngStyle]="getControlButtonStyle()"
-            (onClick)="togglePause()"
-            [disabled]="!getCurrentPerformer()"
             [loading]="isLoadingAction">
           </p-button>
         </div>
@@ -343,7 +339,7 @@
             <div class="flex gap-1">
               <!-- Llamar a escena / Iniciar Performance -->
               <p-button 
-                [icon]="entry.status === 'called' ? 'pi pi-play' : 'pi pi-headphones'"
+                [icon]="entry.status === 'called' ? 'pi pi-play' : 'pi pi-volume-up'"
                 [label]="entry.status === 'called' ? 'Iniciar' : ''"
                 size="small"
                 [severity]="entry.status === 'called' ? 'success' : 'info'"
@@ -354,7 +350,7 @@
               </p-button>
               
               <p-button 
-                icon="pi pi-check"
+                icon="pi pi-stop"
                 size="small"
                 severity="info"
                 [outlined]="true"
