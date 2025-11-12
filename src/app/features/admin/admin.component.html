@@ -129,16 +129,16 @@
             pTooltip="Iniciar performance">
           </p-button>
           <p-button 
-            icon="pi pi-pause"
-            severity="secondary"
+            icon="pi pi-stop-circle"
+            severity="danger"
             [outlined]="true"
             size="small"
-            (onClick)="togglePause()"
+            (onClick)="markDone(current)"
             [disabled]="current.status !== 'performing'"
-            pTooltip="Pausar/Reanudar">
+            pTooltip="Marcar como terminada">
           </p-button>
           <p-button 
-            icon="pi pi-forward"
+            icon="pi pi-step-forward"
             severity="info"
             [outlined]="true"
             size="small"
@@ -181,16 +181,16 @@
               pTooltip="Iniciar performance">
             </p-button>
             <p-button 
-              icon="pi pi-pause"
-              severity="secondary"
+              icon="pi pi-stop-circle"
+              severity="danger"
               [outlined]="true"
               size="small"
-              (onClick)="togglePause()"
+              (onClick)="markDone(called)"
               [disabled]="called.status !== 'performing'"
-              pTooltip="Pausar/Reanudar">
+              pTooltip="Marcar como terminada">
             </p-button>
             <p-button 
-              icon="pi pi-forward"
+              icon="pi pi-step-forward"
               severity="info"
               [outlined]="true"
               size="small"
