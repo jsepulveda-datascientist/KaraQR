@@ -260,7 +260,7 @@
                 size="small"
                 [severity]="entry.status === 'called' ? 'success' : 'info'"
                 [outlined]="true"
-                (onClick)="entry.status === 'called' ? startPerformance(entry) : setPerforming(entry)"
+                (onClick)="entry.status === 'called' ? startPerformance(entry) : callNext()"
                 [disabled]="entry.status === 'performing' || entry.status === 'done'"
                 [pTooltip]="entry.status === 'called' ? 'Iniciar performance' : 'Llamar a escena'">
               </p-button>
