@@ -40,7 +40,7 @@
         </div>
         
         <!-- Si hay cantante actual -->
-        <div class="performer-card" *ngIf="current() as currentSinger; else waitingState">
+        <div class="performer-card" *ngIf="current() as currentSinger; else checkCalled">
           <div class="performer-info">
             <h2 class="performer-name">{{ currentSinger.name }}</h2>
             <div class="song-info">
@@ -57,6 +57,25 @@
             </div>
           </div>
         </div>
+        
+        <!-- Si no hay cantante actual, verificar si hay alguien llamado -->
+        <ng-template #checkCalled>
+          <div class="performer-card" *ngIf="called() as calledSinger; else waitingState">
+            <div class="performer-info called-state">
+              <div class="called-badge">
+                <i class="pi pi-bell"></i>
+                <span>¡LLAMADO A ESCENA!</span>
+              </div>
+              <h2 class="performer-name">{{ calledSinger.name }}</h2>
+              <div class="song-info">
+                <div class="song-details" *ngIf="parseTitle(calledSinger.title_raw || calledSinger.song) as song">
+                  <span class="artist" *ngIf="song.artist">{{ song.artist }}</span>
+                  <span class="title">{{ song.title }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
         
         <!-- Estado de espera -->
         <ng-template #waitingState>

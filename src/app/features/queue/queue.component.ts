@@ -219,6 +219,10 @@ export class QueueComponent implements OnInit, OnDestroy {
     return this.performingEntry;
   }
 
+  called() {
+    return this.entries.find(entry => entry.status === 'called') || null;
+  }
+
   next() {
     return this.entries
       .filter(entry => entry.status === 'waiting')
