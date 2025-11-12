@@ -19,6 +19,7 @@ import { MessageService } from 'primeng/api';
 
 // Services y modelos
 import { QueueService } from '../../core/services/queue.service';
+import { TenantService } from '../../core/services/tenant.service';
 import { QueueEntry } from '../../core/interfaces/queue.interface';
 import { environment } from '../../../environments/environment';
 
@@ -49,6 +50,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   // Estado
   entries: QueueEntry[] = [];
   tenantId: string = '';
+  tenantData?: any;
   now = new Date();
   isMobileView = false;
   
@@ -70,6 +72,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private queueService: QueueService,
+    private tenantService: TenantService,
     private messageService: MessageService
   ) {
     // Obtener tenantId
@@ -159,6 +162,9 @@ export class AdminComponent implements OnInit, OnDestroy {
    */
   private initializeAdmin(): void {
     console.log('Inicializando admin para tenant:', this.tenantId);
+    
+    // Cargar datos del tenant
+    this.loadTenantData();
     
     // Cargar cola inicial
     this.reloadQueue();
@@ -678,4 +684,21 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  /**
+   * Cargar datos del tenant
+   */
+  private loadTenantData(): void {
+    this.tenantService.getTenant(this.tenantId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (tenant: any | null) => {
+          this.tenantData = tenant || undefined;
+        },
+        error: (error: any) => {
+          console.error('Error loading tenant data:', error);
+        }
+      });
+  }
 }
+

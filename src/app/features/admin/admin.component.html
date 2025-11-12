@@ -65,7 +65,7 @@
   
   <!-- Header -->
   <div class="admin-header p-4">
-    <div class="flex align-items-center justify-content-between">
+    <div class="flex align-items-center justify-content-between w-full">
       <div class="flex align-items-center gap-3">
         <i class="pi pi-cog text-4xl text-primary"></i>
         <div>
@@ -74,14 +74,7 @@
         </div>
       </div>
       
-      <div class="flex align-items-center gap-2">
-        <p-tag 
-          [value]="'Conectado'" 
-          severity="success" 
-          icon="pi pi-check-circle">
-        </p-tag>
-        <span class="text-sm text-color-secondary">{{ now | date:'shortTime' }}</span>
-      </div>
+      <span class="text-sm text-color-secondary">{{ now | date:'shortTime' }}</span>
     </div>
   </div>
 
@@ -307,6 +300,22 @@
       </ng-template>
     </p-table>
   </div>
+
+  <!-- Footer -->
+  <footer class="admin-footer">
+    <div class="footer-content">
+      <div class="tenant-info">
+        <img 
+          [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
+          [alt]="tenantData?.display_name || tenantId"
+          class="tenant-logo"
+          onerror="this.src='/layout/images/logo/logo.png'"
+        />
+        <span class="tenant-name">{{ tenantData?.display_name || tenantId }}</span>
+      </div>
+      <span class="powered-by">Powered by KaraQR</span>
+    </div>
+  </footer>
 </div>
 
 <!-- Dialog para editar URL de YouTube -->

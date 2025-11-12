@@ -73,12 +73,11 @@
   width: 100% !important;
   font-weight: 600 !important;
   background: linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(31, 41, 55, 0.6)) !important;
-  border: 2px solid var(--glow-color) !important;
+  border: none !important;
   color: #ffffff !important;
   transition: all 0.3s ease;
 
   &:hover:not(:disabled) {
-    border-color: var(--brand-primary) !important;
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.3) !important;
   }
 }
@@ -176,6 +175,51 @@
   }
 }
 
+.admin-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 3rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(75, 85, 99, 0.3);
+  margin-top: auto;
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.tenant-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+}
+
+.tenant-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--brand-primary);
+}
+
+.tenant-name {
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+}
+
+.powered-by {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .admin-header {
     padding: 1rem;
@@ -190,5 +234,21 @@
   .current-performer-card {
     flex-direction: column;
     text-align: center;
+  }
+
+  .admin-footer {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .powered-by {
+    font-size: 0.75rem;
   }
 }
