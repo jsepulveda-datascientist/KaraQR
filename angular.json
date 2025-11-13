@@ -38,7 +38,9 @@
                         "allowedCommonJsDependencies": [
                             "qrcode",
                             "quill-delta",
-                            "tslib"
+                            "tslib",
+                            "core-js",
+                            "resize-observer-polyfill"
                         ]
                     },
                     "configurations": {
