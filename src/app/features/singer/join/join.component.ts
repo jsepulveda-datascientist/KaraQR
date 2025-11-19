@@ -12,16 +12,14 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { AutoCompleteModule } from 'primeng/autocomplete';
-import { MenuModule } from 'primeng/menu';
 import { MessageService } from 'primeng/api';
-import { MenuItem } from 'primeng/api';
 
 // Services
-import { QueueService } from '../../core/services/queue.service';
-import { environment } from '../../../environments/environment';
+import { QueueService } from '../../../core/services/queue.service';
+import { environment } from '../../../../environments/environment';
 
 // Interfaces
-import { QueueEntry } from '../../core/interfaces/queue.interface';
+import { QueueEntry } from '../../../core/interfaces/queue.interface';
 
 @Component({
   selector: 'app-join',
@@ -33,8 +31,7 @@ import { QueueEntry } from '../../core/interfaces/queue.interface';
     ButtonModule,
     ToastModule,
     CardModule,
-    AutoCompleteModule,
-    MenuModule
+    AutoCompleteModule
   ],
   providers: [MessageService],
   templateUrl: './join.component.html',
@@ -49,7 +46,6 @@ export class JoinComponent implements OnInit, OnDestroy {
   showConfirmation = false;
   submittedData: any = null;
   filteredSongs: any[] = [];
-  menuItems: MenuItem[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -64,7 +60,6 @@ export class JoinComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeForm();
     this.getTenantFromRoute();
-    this.initializeMenu();
   }
 
   ngOnDestroy(): void {
@@ -230,10 +225,6 @@ export class JoinComponent implements OnInit, OnDestroy {
     this.router.navigate(['/queue', this.tenantId]); // Updated to use path params instead of query params
   }
 
-  goToHome(): void {
-    this.router.navigate(['/singer/home']);
-  }
-
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Enter' && this.joinForm.valid) {
       event.preventDefault();
@@ -280,48 +271,4 @@ export class JoinComponent implements OnInit, OnDestroy {
     return 'Campo inválido';
   }
 
-  private initializeMenu(): void {
-    this.menuItems = [
-      {
-        label: 'Home',
-        icon: 'pi pi-home',
-        command: () => {
-          this.goToHome();
-        }
-      },
-      {
-        label: 'Agregarse a la lista',
-        icon: 'pi pi-plus',
-        command: () => {
-          this.addToList();
-        }
-      },
-      {
-        label: 'Enviar reacción',
-        icon: 'pi pi-heart',
-        command: () => {
-          this.sendReaction();
-        }
-      }
-    ];
-  }
-
-  addToList(): void {
-    // Si estamos en confirmación, volver al formulario
-    if (this.showConfirmation) {
-      this.requestAnotherSong();
-    } else {
-      // Si ya estamos en el formulario, hacer scroll al inicio
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
-  sendReaction(): void {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Reacción enviada',
-      detail: '¡Gracias por tu participación! 🎉',
-      life: 3000
-    });
-  }
 }

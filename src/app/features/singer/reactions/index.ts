@@ -1,0 +1,1 @@
+export { SingerReactionsComponent } from './singer-reactions.component';

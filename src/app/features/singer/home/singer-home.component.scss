@@ -1,0 +1,205 @@
+/* Singer Home - Específico del contenido */
+/* Los estilos del layout y menú se manejan desde el SingerLayoutComponent */
+
+/* Variables para consistencia */
+:host {
+  --brand-primary: #6366f1;
+  --brand-accent: #f59e0b;
+  --glow-color: #06b6d4;
+  --bg-dark: #111827;
+  --bg-darker: #0f172a;
+}
+
+/* Contenido específico del singer home */
+.singer-home-content {
+  .field {
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 480px) {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      @media (max-width: 480px) {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}
+
+/* Status display */
+.status-display {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 0.5rem;
+  padding: 1rem;
+
+  .status-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .status-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      
+      &.status-in-queue {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      &.status-available {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+    }
+
+    .status-info {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+/* Quick actions grid */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .quick-action-btn {
+    padding: 0.75rem 1rem !important;
+    border-radius: 0.5rem !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease !important;
+
+    /* Usar los mismos estilos de botón que join */
+    background: rgba(99, 102, 241, 0.1) !important;
+    border: 1.5px solid #6366f1 !important;
+    color: #6366f1 !important;
+
+    &:hover {
+      background: rgba(99, 102, 241, 0.15) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
+    }
+
+    @media (max-width: 480px) {
+      padding: 1rem !important;
+      font-size: 1rem !important;
+    }
+  }
+}
+
+/* Stats display */
+.stats-display {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 0.5rem;
+  padding: 1rem;
+
+  .stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      flex: 1;
+
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #6366f1;
+        line-height: 1;
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 2rem;
+      background: rgba(99, 102, 241, 0.2);
+    }
+  }
+}
+
+/* Tip display */
+.tip-display {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 0.5rem;
+  padding: 1rem;
+
+  .tip-content {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.5;
+    font-style: italic;
+  }
+}
+
+/* Responsividad adicional */
+@media (max-width: 480px) {
+  .status-display .status-content {
+    gap: 0.75rem;
+
+    .status-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1rem;
+    }
+  }
+
+  .stats-display .stats-row {
+    gap: 0.5rem;
+
+    .stat-item .stat-number {
+      font-size: 1.25rem;
+    }
+  }
+}

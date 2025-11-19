@@ -1,7 +1,15 @@
 <div class="join-container p-fluid">
   
   <!-- Formulario de inscripción -->
-  <p-card header="🎤 Anótate para cantar" *ngIf="!showConfirmation" styleClass="join-card">
+  <p-card *ngIf="!showConfirmation" styleClass="join-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div class="header-left">
+          <h3 class="header-title">KaraQR</h3>
+        </div>
+        <span class="header-subtitle">Basement415</span>
+      </div>
+    </ng-template>
     <form [formGroup]="joinForm" (ngSubmit)="onSubmit()" (keydown)="onKeyDown($event)" novalidate>
       
       <!-- Campo Nombre -->
@@ -100,6 +108,14 @@
 
   <!-- Pantalla de confirmación -->
   <p-card *ngIf="showConfirmation" class="confirmation-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div class="header-left">
+          <h3 class="header-title">KaraQR</h3>
+        </div>
+        <span class="header-subtitle">Basement415</span>
+      </div>
+    </ng-template>
     <div class="confirmation-content">
       
       <!-- Ícono de éxito -->
@@ -108,7 +124,7 @@
       </div>
       
       <!-- Mensaje principal -->
-      <h2 class="confirmation-title">¡Listo para cantar! 🎤</h2>
+      <h2 class="confirmation-title">¡{{ submittedData?.song }} lista para cantar! 🎤</h2>
       <p class="confirmation-message">
         Te has anotado exitosamente en la cola de karaoke
       </p>
@@ -130,7 +146,15 @@
         <div class="detail-item" *ngIf="submittedData?.youtubeLink">
           <i class="pi pi-youtube detail-icon"></i>
           <span class="detail-label">YouTube:</span>
-          <span class="detail-value">Link incluido</span>
+          <a 
+            [href]="submittedData?.youtubeLink" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="detail-value youtube-link"
+          >
+            {{ submittedData?.youtubeLink }}
+            <i class="pi pi-external-link ml-1"></i>
+          </a>
         </div>
       </div>
       
@@ -145,15 +169,8 @@
         <button 
           pButton 
           label="🎵 Anotar otra canción"
-          class="p-button-outlined w-full mb-2"
+          class="p-button-outlined w-full"
           (click)="requestAnotherSong()"
-        ></button>
-        
-        <button 
-          pButton 
-          label="📋 Ver la cola"
-          class="p-button-secondary w-full"
-          (click)="goToQueue()"
         ></button>
       </div>
       

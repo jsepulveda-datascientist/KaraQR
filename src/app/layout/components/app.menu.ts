@@ -26,6 +26,11 @@ export class AppMenu {
             icon: 'pi pi-fw pi-microphone',
             items: [
                 {
+                    label: 'Inicio',
+                    icon: 'pi pi-fw pi-home',
+                    routerLink: ['/home']
+                },
+                {
                     label: 'Emparejamiento TV',
                     icon: 'pi pi-fw pi-desktop',
                     routerLink: ['/pairing']  // Updated from '/screen'
@@ -44,6 +49,17 @@ export class AppMenu {
                     label: 'Gestión de Tenants',
                     icon: 'pi pi-fw pi-users',
                     routerLink: ['/tenant-management']
+                },
+                { separator: true },
+                {
+                    label: 'Cantante - Unirse',
+                    icon: 'pi pi-fw pi-user-plus',
+                    routerLink: ['/singer/join']
+                },
+                {
+                    label: 'Cantante - Dashboard',
+                    icon: 'pi pi-fw pi-chart-line',
+                    routerLink: ['/singer/dashboard']
                 },
                 { separator: true }
             ]

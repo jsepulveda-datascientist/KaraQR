@@ -7,6 +7,10 @@ export const appRoutes: Routes = [
         loadComponent: () => import('@/pages/landing/landing').then((c) => c.Landing)
     },
     {
+        path: 'home',
+        loadComponent: () => import('@/pages/home').then((c) => c.HomeComponent)
+    },
+    {
         path: 'admin',  // Keep admin layout access
         component: AppLayout,
         children: [
@@ -60,8 +64,12 @@ export const appRoutes: Routes = [
     },
     { path: 'auth', loadChildren: () => import('@/pages/auth/auth.routes') },
     {
+        path: 'singer',
+        loadChildren: () => import('@/features/singer/singer.routes').then((r) => r.SINGER_ROUTES)
+    },
+    {
         path: 'join',
-        loadComponent: () => import('@/features/join/join.component').then((c) => c.JoinComponent)
+        loadComponent: () => import('@/features/singer/join/join.component').then((c) => c.JoinComponent)
     },
     {
         path: 'queue/:tenantId',
