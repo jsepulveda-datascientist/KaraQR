@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject, interval } from 'rxjs';
@@ -13,10 +13,14 @@ import { DividerModule } from 'primeng/divider';
 // QR Code
 import { QRCodeComponent } from 'angularx-qrcode';
 
+// Reactions Component
+import { ReactionsDisplayComponent } from './reactions-display/reactions-display.component';
+
 // Services
 import { QueueService } from '../../core/services/queue.service';
 import { TenantService } from '../../core/services/tenant.service';
 import { UrlService } from '../../core/services/url.service';
+import { ReactionsService } from '../../core/services/reactions.service';
 import { QueueEntry } from '../../core/interfaces';
 import { Tenant } from '../../core/models/tenant.model';
 import { environment } from '../../../environments/environment';
@@ -31,7 +35,8 @@ import { environment } from '../../../environments/environment';
     CardModule,
     ButtonModule,
     DividerModule,
-    QRCodeComponent
+    QRCodeComponent,
+    ReactionsDisplayComponent
   ],
   templateUrl: './queue.component.html',
   styleUrls: ['./queue.component.scss']
@@ -58,7 +63,9 @@ export class QueueComponent implements OnInit, OnDestroy {
     private router: Router,
     private queueService: QueueService,
     private tenantService: TenantService,
-    private urlService: UrlService
+    private urlService: UrlService,
+    private reactionsService: ReactionsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -192,8 +199,10 @@ export class QueueComponent implements OnInit, OnDestroy {
       if (videoId && videoId !== this.currentVideoId) {
         this.currentVideoId = videoId;
         // Auto-activate presentation mode when YouTube video is detected
-        console.log('🎵 Auto-activating video for TV projection');
+        console.log('🎥 Auto-activating video for TV projection');
+        console.log('🎭 REACCIONES: Cambiando a modo presentación - desactivando pantalla principal, activando video');
         this.presentationMode = true;
+        this.cdr.detectChanges(); // Forzar detección de cambios
         
         // Wait for DOM and YouTube API
         setTimeout(() => {
@@ -203,13 +212,17 @@ export class QueueComponent implements OnInit, OnDestroy {
       } else if (!videoId) {
         // No video available, deactivate presentation mode
         console.log('❌ No video detected, deactivating presentation mode');
+        console.log('🎭 REACCIONES: Volviendo a modo normal - activando pantalla principal, desactivando video');
         this.presentationMode = false;
+        this.cdr.detectChanges(); // Forzar detección de cambios
         this.destroyPresentationPlayer();
       }
     } else {
       console.log('❌ No performing entry, deactivating presentation mode');
+      console.log('🎭 REACCIONES: Sin cantante actual - volviendo a modo normal');
       this.currentVideoId = null;
       this.presentationMode = false;
+      this.cdr.detectChanges(); // Forzar detección de cambios
       this.destroyPresentationPlayer();
     }
   }
@@ -363,6 +376,7 @@ export class QueueComponent implements OnInit, OnDestroy {
     if (this.currentVideoId) {
       console.log('🎬 Auto-activating presentation mode for TV');
       this.presentationMode = true;
+      this.cdr.detectChanges(); // Forzar detección de cambios
       setTimeout(() => {
         this.createPresentationPlayer();
       }, 100);

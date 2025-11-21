@@ -44,9 +44,10 @@ import { CardModule } from 'primeng/card';
             </ng-template>
             <ng-template pTemplate="footer">
               <button pButton 
-                label="Unirse a la Cola" 
-                icon="pi pi-plus" 
-                routerLink="/singer/join"
+                label="Usar App Móvil" 
+                icon="pi pi-mobile" 
+                disabled="true"
+                title="Escanea el QR para usar la nueva app móvil"
                 class="p-button-outlined">
               </button>
             </ng-template>
@@ -142,15 +143,17 @@ import { CardModule } from 'primeng/card';
         <h2 class="section-title">Acciones Rápidas</h2>
         <div class="quick-actions-grid">
           <button pButton 
-            label="Cantante - Unirse" 
-            icon="pi pi-user-plus" 
-            routerLink="/singer/join"
+            label="App Móvil - Unirse" 
+            icon="pi pi-mobile" 
+            disabled="true"
+            title="Usa la nueva app móvil para unirte"
             class="p-button-lg p-button-success">
           </button>
           <button pButton 
-            label="Ver Cola Actual" 
+            label="Pantalla - Ver Cola" 
             icon="pi pi-eye" 
-            routerLink="/singer/queue"
+            disabled="true"
+            title="Conecta una pantalla para ver la cola"
             class="p-button-lg">
           </button>
           <button pButton 

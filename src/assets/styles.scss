@@ -3,6 +3,3 @@
 @use './layout/layout.scss';
 @use 'primeicons/primeicons.css';
 @use './demo/demo.scss';
-
-/* Importar estilos globales del módulo singer para mejorar visibilidad del menú */
-@import '../app/features/singer/singer-global-styles.scss';

@@ -1,0 +1,45 @@
+<div class="reactions-display" [class.show-reactions]="isVisible">
+  
+  <!-- Estadísticas de reacciones flotantes -->
+  <div class="reaction-stats" *ngIf="showStats && (stats$ | async) as stats">
+    <div class="stat-item" 
+         *ngFor="let reaction of availableReactions" 
+         [style.color]="reaction.color"
+         [@countAnimation]="getStatValue(stats, reaction.type)">
+      <span class="stat-emoji">{{ reaction.emoji }}</span>
+      <span class="stat-count">{{ getStatValue(stats, reaction.type) }}</span>
+    </div>
+  </div>
+
+  <!-- Overlay de reacciones animadas -->
+  <div class="reactions-overlay" *ngIf="showAnimations">
+    <!-- Reacciones con emoji -->
+    <div class="flying-reaction" 
+         *ngFor="let reaction of flyingReactions; trackBy: trackByReaction"
+         [@flyAnimation]="reaction.id"
+         [style.left.%]="reaction.x">
+      <div class="reaction-content">
+        <div class="reaction-emoji">{{ reaction.emoji }}</div>
+        <div class="reaction-user">{{ reaction.userName }}</div>
+      </div>
+    </div>
+    
+    <!-- Comentarios con texto -->
+    <div class="flying-comment" 
+         *ngFor="let comment of flyingComments; trackBy: trackByComment"
+         [@flyAnimation]="comment.id"
+         [style.left.%]="comment.x">
+      <div class="comment-content">
+        <div class="comment-text">{{ comment.userName }}: {{ comment.text }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicador de conexión -->
+  <div class="connection-indicator" 
+       [class.connected]="isConnected$ | async"
+       [class.disconnected]="!(isConnected$ | async)">
+    <i class="pi" [class.pi-wifi]="isConnected$ | async" [class.pi-wifi-off]="!(isConnected$ | async)"></i>
+    <span>{{ (isConnected$ | async) ? 'Conectado' : 'Desconectado' }}</span>
+  </div>
+</div>

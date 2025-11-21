@@ -64,14 +64,6 @@ export const appRoutes: Routes = [
     },
     { path: 'auth', loadChildren: () => import('@/pages/auth/auth.routes') },
     {
-        path: 'singer',
-        loadChildren: () => import('@/features/singer/singer.routes').then((r) => r.SINGER_ROUTES)
-    },
-    {
-        path: 'join',
-        loadComponent: () => import('@/features/singer/join/join.component').then((c) => c.JoinComponent)
-    },
-    {
         path: 'queue/:tenantId',
         loadComponent: () => import('@/features/queue/queue.component').then((c) => c.QueueComponent)
     },

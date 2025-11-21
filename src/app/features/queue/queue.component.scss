@@ -498,6 +498,125 @@
   cursor: pointer;
 }
 
+/* Overlay de reacciones específico para video */
+.video-reactions-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 100 !important;
+  
+  /* Asegurar que las reacciones animadas se vean sobre el video pero debajo de controles */
+  ::ng-deep .reactions-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none !important;
+    z-index: 101 !important;
+  }
+  
+  ::ng-deep .flying-reaction,
+  ::ng-deep .flying-comment {
+    pointer-events: none !important;
+    z-index: 102 !important;
+    position: absolute !important;
+  }
+  
+  /* Ocultar stats, feed e indicador de conexión en modo video */
+  ::ng-deep .reaction-stats,
+  ::ng-deep .reactions-feed,
+  ::ng-deep .connection-indicator {
+    display: none !important;
+  }
+}
+
+/* Componente global de reacciones - siempre activo */
+.global-reactions-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  z-index: 10000 !important; /* Z-index muy alto para estar sobre todo */
+  background: transparent !important; /* Sin fondo */
+  
+  /* Contenedor principal de reacciones - SIN fondo visible */
+  ::ng-deep .reactions-display {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none !important;
+    background: transparent !important; /* Sin fondo */
+  }
+  
+  /* Overlay de animaciones - cubre toda la pantalla PERO TRANSPARENTE */
+  ::ng-deep .reactions-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    pointer-events: none !important;
+    z-index: 10002 !important;
+    background: transparent !important; /* Sin fondo */
+  }
+  
+  /* Reacciones y comentarios voladores */
+  ::ng-deep .flying-reaction,
+  ::ng-deep .flying-comment {
+    pointer-events: none !important;
+    position: absolute !important;
+    z-index: 10003 !important;
+  }
+  
+  /* Indicador de conexión - TEMPORAL y más discreto */
+  ::ng-deep .connection-indicator {
+    position: fixed !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    background: rgba(34, 197, 94, 0.8) !important;
+    border-radius: 4px !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.6rem !important;
+    z-index: 10001 !important;
+    pointer-events: none !important;
+    color: white !important;
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+    display: none !important; /* TEMPORALMENTE OCULTO para debugging */
+    align-items: center !important;
+    gap: 0.2rem !important;
+  }
+  
+  ::ng-deep .connection-indicator.connected {
+    background: rgba(34, 197, 94, 0.9) !important;
+  }
+  
+  ::ng-deep .connection-indicator.disconnected {
+    background: rgba(239, 68, 68, 0.9) !important;
+  }
+  
+  /* Asegurar que NO hay fondos en ningún elemento */
+  ::ng-deep * {
+    background-color: transparent !important;
+  }
+  
+  /* Solo el indicador de conexión puede tener fondo (pero está oculto) */
+  ::ng-deep .connection-indicator.connected {
+    background-color: rgba(34, 197, 94, 0.9) !important;
+  }
+  
+  ::ng-deep .connection-indicator.disconnected {
+    background-color: rgba(239, 68, 68, 0.9) !important;
+  }
+}
+
 /* Header Mínimo */
 .presentation-header {
   display: flex;

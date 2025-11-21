@@ -1,1 +1,0 @@
-export { SingerLayoutComponent } from './singer-layout.component';

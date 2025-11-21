@@ -52,14 +52,10 @@ export class AppMenu {
                 },
                 { separator: true },
                 {
-                    label: 'Cantante - Unirse',
-                    icon: 'pi pi-fw pi-user-plus',
-                    routerLink: ['/singer/join']
-                },
-                {
-                    label: 'Cantante - Dashboard',
-                    icon: 'pi pi-fw pi-chart-line',
-                    routerLink: ['/singer/dashboard']
+                    label: 'App Móvil (Nuevo)',
+                    icon: 'pi pi-fw pi-mobile',
+                    disabled: true,
+                    title: 'Usa la nueva aplicación móvil Vue'
                 },
                 { separator: true }
             ]

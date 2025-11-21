@@ -59,8 +59,8 @@ export class SupabaseService {
   /**
    * Crear canal para subscripciones en tiempo real
    */
-  channel(name: string) {
-    return this.supabase.channel(name);
+  channel(name: string, config?: any) {
+    return this.supabase.channel(name, config);
   }
 
   /**

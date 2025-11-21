@@ -155,18 +155,10 @@
   <!-- Footer Compacto -->
   <footer class="queue-footer">
     <div class="footer-content">
-      <div class="tenant-info">
-        <img 
-          [src]="tenantData?.logo_url || '/layout/images/logo/logo.png'" 
-          [alt]="tenantData?.display_name || tenantId"
-          class="tenant-logo"
-          (error)="onImageError($event)"
-        />
-        <span class="tenant-name">{{ tenantData?.display_name || tenantId }}</span>
-      </div>
       <span class="powered-by">Powered by KaraQR</span>
     </div>
   </footer>
+
 </div>
 
 <!-- MODO PRESENTACIÓN OVERLAY AUTOMÁTICO -->
@@ -240,3 +232,14 @@
   </footer>
 
 </div>
+
+<!-- COMPONENTE GLOBAL DE REACCIONES - Siempre activo con z-index alto -->
+<app-reactions-display
+  [tenantId]="tenantId"
+  [showStats]="false"
+  [showFeed]="false"
+  [showAnimations]="true"
+  [autoConnect]="true"
+  [isVisible]="true"
+  class="global-reactions-overlay"
+></app-reactions-display>

@@ -1,0 +1,282 @@
+/* Reactions Display Component Styles */
+
+:host {
+  background: transparent !important;
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.reactions-display {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  background: transparent !important; /* Sin fondo */
+
+  &.show-reactions {
+    opacity: 1;
+  }
+
+  * {
+    pointer-events: auto;
+  }
+}
+
+/* Estadísticas flotantes */
+.reaction-stats {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 12px 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    min-width: 45px;
+    transition: all 0.3s ease;
+
+    .stat-emoji {
+      font-size: 1.2rem;
+    }
+
+    .stat-count {
+      font-size: 0.9rem;
+      min-width: 20px;
+      text-align: center;
+    }
+  }
+}
+
+/* Overlay de reacciones animadas */
+.reactions-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: transparent !important; /* Sin fondo */
+
+  .flying-reaction {
+    position: absolute;
+    z-index: 51;
+    pointer-events: none;
+    bottom: 15%;
+    animation-fill-mode: forwards;
+    
+    .reaction-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      
+      .reaction-emoji {
+        font-size: 3.5rem;
+        margin-bottom: 8px;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+      }
+      
+      .reaction-user {
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-shadow: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        min-width: 80px;
+      }
+    }
+  }
+
+  .flying-comment {
+    position: absolute;
+    z-index: 51;
+    pointer-events: none;
+    bottom: 15%;
+    animation-fill-mode: forwards;
+    
+    .comment-content {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      
+      .comment-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        font-weight: 500;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        max-width: 400px;
+        min-width: 150px;
+        line-height: 1.3;
+        position: relative;
+        
+        /* Efecto de brillo */
+        &::before {
+          content: '';
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          right: -2px;
+          bottom: -2px;
+          background: linear-gradient(45deg, rgba(255,255,255,0.3), transparent, rgba(255,255,255,0.3));
+          border-radius: 25px;
+          z-index: -1;
+        }
+        
+        /* Sombra interior */
+        &::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 23px;
+          box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.3);
+        }
+      }
+    }
+  }
+}
+
+/* Indicador de conexión */
+.connection-indicator {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  z-index: 100;
+
+  &.connected {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+  }
+
+  &.disconnected {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+  }
+
+  i {
+    font-size: 0.9rem;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .reaction-stats {
+    top: 10px;
+    right: 10px;
+    padding: 8px 12px;
+    gap: 8px;
+
+    .stat-item {
+      gap: 4px;
+      min-width: 35px;
+
+      .stat-emoji {
+        font-size: 1rem;
+      }
+
+      .stat-count {
+        font-size: 0.8rem;
+      }
+    }
+  }
+
+  .connection-indicator {
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .flying-reaction {
+    .reaction-content {
+      .reaction-emoji {
+        font-size: 2.5rem !important;
+      }
+      
+      .reaction-user {
+        font-size: 0.9rem !important;
+        padding: 4px 8px !important;
+        min-width: 60px !important;
+      }
+    }
+  }
+
+  .flying-comment {
+    .comment-content {
+      .comment-text {
+        font-size: 1rem !important;
+        padding: 8px 16px !important;
+        max-width: 280px !important;
+        min-width: 120px !important;
+      }
+    }
+  }
+}
+
+/* Animaciones adicionales para mejor UX */
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.1); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.stat-item:hover {
+  animation: heartbeat 0.6s ease-in-out;
+}
+
+/* Efectos de entrada suaves */
+.reactions-display {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
