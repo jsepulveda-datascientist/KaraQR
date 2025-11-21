@@ -1,5 +1,5 @@
 # Redirección de /join a karaQR-singer app
-/join/:tenant  https://karaqr-singer.pages.dev/login?tenant=:tenant  302
+/join/:tenant  https://karaqr-singer.pages.dev/?tenant=:tenant  302
 /join  https://karaqr-singer.pages.dev/  302
 
 # SPA fallback
