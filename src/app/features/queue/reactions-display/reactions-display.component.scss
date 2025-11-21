@@ -14,9 +14,10 @@
   height: 100%;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  opacity: 0;
+  opacity: 1; /* Siempre visible - removido el problema de opacidad 0 */
   background: transparent !important; /* Sin fondo */
 
+  /* Mantenemos la clase por compatibilidad pero ya no afecta la opacidad */
   &.show-reactions {
     opacity: 1;
   }

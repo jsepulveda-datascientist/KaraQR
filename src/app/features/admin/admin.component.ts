@@ -693,10 +693,6 @@ export class AdminComponent implements OnInit, OnDestroy {
   resetCompletedEntry(entry: QueueEntry): void {
     if (!entry.id || entry.status !== 'done') return;
 
-    if (!confirm(`¿Estás seguro que deseas volver a ${entry.name} a su estado inicial?`)) {
-      return;
-    }
-
     this.isLoadingAction = true;
     this.queueService.setStatus(entry.id, 'waiting').subscribe({
       next: () => {

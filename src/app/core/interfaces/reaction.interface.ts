@@ -4,9 +4,20 @@
  */
 
 /**
- * Tipos de reacciones disponibles
+ * Tipos de reacciones disponibles - Sincronizado con karaQR-singer
  */
-export type ReactionType = 'love' | 'fire' | 'clap' | 'music' | 'amazing';
+export type ReactionType = 
+  | 'love'      // ❤️ Amor/Me encanta
+  | 'clap'      // 👏 Aplauso
+  | 'rock'      // 🤘 Rock/Metal
+  | 'mindblown' // 🤩 Increíble/Mente volada
+  | 'fire'      // 🔥 Fuego/Excelente
+  | 'guitar'    // 🎸 Guitarra
+  | 'electric'  // ⚡ Eléctrico/Energía
+  | 'music'     // 🎵 Música/Nota musical
+  | 'loud'      // 🔊 Volumen alto
+  | 'cool'      // 😎 Genial/Cool
+  | 'praise';   // 🙌 Alabanza/Celebración
 
 /**
  * Estructura de una reacción individual
@@ -41,14 +52,20 @@ export interface ReactionMessage {
 }
 
 /**
- * Estadísticas de reacciones para la UI
+ * Estadísticas de reacciones para la UI - Actualizado con todos los tipos
  */
 export interface ReactionStats {
   love: number;
-  fire: number;
   clap: number;
+  rock: number;
+  mindblown: number;
+  fire: number;
+  guitar: number;
+  electric: number;
   music: number;
-  amazing: number;
+  loud: number;
+  cool: number;
+  praise: number;
   totalComments: number;
 }
 

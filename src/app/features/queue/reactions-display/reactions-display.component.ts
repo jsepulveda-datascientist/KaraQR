@@ -135,10 +135,16 @@ export class ReactionsDisplayComponent implements OnInit, OnDestroy, OnChanges {
   flyingComments: FlyingComment[] = [];
   availableReactions = [
     { type: 'love' as ReactionType, emoji: '❤️', label: 'Amor', color: '#e91e63' },
-    { type: 'fire' as ReactionType, emoji: '🔥', label: 'Fuego', color: '#ff5722' },
     { type: 'clap' as ReactionType, emoji: '👏', label: 'Aplauso', color: '#4caf50' },
+    { type: 'rock' as ReactionType, emoji: '🤘', label: 'Rock', color: '#f44336' },
+    { type: 'mindblown' as ReactionType, emoji: '🤩', label: 'Increíble', color: '#9c27b0' },
+    { type: 'fire' as ReactionType, emoji: '🔥', label: 'Fuego', color: '#ff5722' },
+    { type: 'guitar' as ReactionType, emoji: '🎸', label: 'Guitarra', color: '#8e24aa' },
+    { type: 'electric' as ReactionType, emoji: '⚡', label: 'Eléctrico', color: '#ffc107' },
     { type: 'music' as ReactionType, emoji: '🎵', label: 'Música', color: '#2196f3' },
-    { type: 'amazing' as ReactionType, emoji: '😍', label: 'Increíble', color: '#9c27b0' }
+    { type: 'loud' as ReactionType, emoji: '🔊', label: 'Volumen', color: '#009688' },
+    { type: 'cool' as ReactionType, emoji: '😎', label: 'Cool', color: '#3f51b5' },
+    { type: 'praise' as ReactionType, emoji: '🙌', label: 'Alabanza', color: '#00bcd4' }
   ];
 
   constructor(private reactionsService: ReactionsService) {
@@ -241,25 +247,59 @@ export class ReactionsDisplayComponent implements OnInit, OnDestroy, OnChanges {
    * Configurar animaciones basadas en el feed
    */
   private setupFeedAnimations(): void {
-    let lastFeedLength = 0;
+    console.log('🎬 Configurando animaciones de feed para reacciones');
+    let lastProcessedId: string | null = null;
 
     this.feed$
       .pipe(takeUntil(this.destroy$))
       .subscribe(feed => {
-        // Solo animar si hay nuevos items
-        if (feed.length > lastFeedLength) {
-          const newItems = feed.slice(0, feed.length - lastFeedLength);
+        console.log(`📢 Feed actualizado: ${feed.length} items`);
+        
+        if (feed.length === 0) {
+          lastProcessedId = null;
+          return;
+        }
+
+        // Encontrar items nuevos basándose en ID, no en longitud
+        let newItems: ReactionFeedItem[] = [];
+        
+        if (lastProcessedId === null) {
+          // Primer procesamiento - solo procesar el item más reciente
+          newItems = feed.slice(0, 1);
+          console.log(`🆕 Primera ejecución - procesando 1 item más reciente`);
+        } else {
+          // Encontrar index del último item procesado
+          const lastProcessedIndex = feed.findIndex(item => item.id === lastProcessedId);
           
-          newItems.forEach(item => {
-            if (item.type === 'reaction' && item.reactionType) {
-              this.createFlyingReaction(item.reactionType, item.userName);
-            } else if (item.type === 'comment' && item.text) {
-              this.createFlyingComment(item.text, item.userName);
-            }
-          });
+          if (lastProcessedIndex === -1) {
+            // El último item procesado ya no está en el feed (se eliminó por límite)
+            // Procesar todos los items nuevos
+            newItems = feed.slice(0, 5); // Procesar máximo 5 items para evitar sobrecarga
+            console.log(`🔄 Último item no encontrado - procesando ${newItems.length} items más recientes`);
+          } else if (lastProcessedIndex > 0) {
+            // Hay items nuevos antes del último procesado
+            newItems = feed.slice(0, lastProcessedIndex);
+            console.log(`✨ ${newItems.length} items nuevos detectados`);
+          }
         }
         
-        lastFeedLength = feed.length;
+        // Procesar items nuevos
+        newItems.forEach(item => {
+          console.log(`📢 Procesando item del feed:`, item);
+          if (item.type === 'reaction' && item.reactionType) {
+            console.log(`🚀 Creando animación para reacción: ${item.reactionType}`);
+            this.createFlyingReaction(item.reactionType, item.userName);
+          } else if (item.type === 'comment' && item.text) {
+            console.log(`💬 Creando animación para comentario: ${item.text}`);
+            this.createFlyingComment(item.text, item.userName);
+          }
+        });
+        
+        // Actualizar el último ID procesado
+        if (newItems.length > 0) {
+          lastProcessedId = newItems[0].id; // El más reciente es el primero
+          console.log(`🏷️ Último ID procesado actualizado: ${lastProcessedId}`);
+        }
       });
   }
 
@@ -267,8 +307,12 @@ export class ReactionsDisplayComponent implements OnInit, OnDestroy, OnChanges {
    * Crear animación de reacción voladora
    */
   private createFlyingReaction(type: ReactionType, userName: string = 'Alguien'): void {
+    console.log(`🚀 Creando reacción voladora: ${type} de ${userName}`);
     const reaction = this.availableReactions.find(r => r.type === type);
-    if (!reaction) return;
+    if (!reaction) {
+      console.warn(`⚠️ Tipo de reacción no encontrado: ${type}`);
+      return;
+    }
 
     const flyingReaction: FlyingReaction = {
       id: `flying_${Date.now()}_${Math.random()}`,
@@ -280,12 +324,14 @@ export class ReactionsDisplayComponent implements OnInit, OnDestroy, OnChanges {
     };
 
     this.flyingReactions.push(flyingReaction);
+    console.log(`✨ Reacción voladora creada: ${flyingReaction.emoji} en x=${flyingReaction.x}%`);
 
     // Remover exactamente cuando termina la animación (4 segundos)
     setTimeout(() => {
       this.flyingReactions = this.flyingReactions.filter(
         r => r.id !== flyingReaction.id
       );
+      console.log(`🧹 Reacción voladora ${flyingReaction.emoji} removida después de 4s`);
     }, 4000);
   }
 
@@ -295,7 +341,7 @@ export class ReactionsDisplayComponent implements OnInit, OnDestroy, OnChanges {
   private createFlyingComment(text: string, userName: string = 'Alguien'): void {
     const flyingComment: FlyingComment = {
       id: `comment_${Date.now()}_${Math.random()}`,
-      text: text.length > 50 ? text.substring(0, 47) + '...' : text, // Limitar longitud
+      text: text.length > 80 ? text.substring(0, 77) + '...' : text, // Limitar longitud
       x: Math.random() * 60 + 20, // 20% a 80% del ancho para comentarios más largos
       userName: userName
     };
@@ -317,9 +363,9 @@ export class ReactionsDisplayComponent implements OnInit, OnDestroy, OnChanges {
     interval(5000)
       .pipe(takeUntil(this.animationCleanup$))
       .subscribe(() => {
-        // Limpiar animaciones viejas
-        this.flyingReactions = this.flyingReactions.slice(-20);
-        this.flyingComments = this.flyingComments.slice(-20);
+        // Limpiar animaciones viejas - aumentado para sesiones largas
+        this.flyingReactions = this.flyingReactions.slice(-50);
+        this.flyingComments = this.flyingComments.slice(-50);
       });
   }
 

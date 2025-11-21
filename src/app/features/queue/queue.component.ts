@@ -58,6 +58,9 @@ export class QueueComponent implements OnInit, OnDestroy {
   joinUrl: string = '';
   presentationMode = false; // Control for presentation overlay
 
+  // Observables públicos
+  public isReactionsConnected$: any;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -66,12 +69,18 @@ export class QueueComponent implements OnInit, OnDestroy {
     private urlService: UrlService,
     private reactionsService: ReactionsService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    // Inicializar observable después de que reactionsService esté disponible
+    this.isReactionsConnected$ = this.reactionsService.connection$;
+  }
 
   ngOnInit(): void {
     this.validateTenantAndRedirect();
     this.setupTimeUpdater();
     this.loadYouTubeAPI(); // Load YouTube API for presentation overlay
+    
+    // Inicializar conexión de reacciones
+    this.initializeReactionsConnection();
   }
 
   ngOnDestroy(): void {
@@ -137,6 +146,25 @@ export class QueueComponent implements OnInit, OnDestroy {
       console.log('🔄 Auto-refreshing queue...');
       this.loadQueue();
     }, 5000);
+  }
+
+  /**
+   * Inicializar conexión al sistema de reacciones
+   */
+  private async initializeReactionsConnection(): Promise<void> {
+    if (this.tenantId) {
+      try {
+        console.log('🔗 Inicializando conexión de reacciones para la cola');
+        const response = await this.reactionsService.connect(this.tenantId);
+        if (response.success) {
+          console.log('✅ Sistema de reacciones conectado en la cola');
+        } else {
+          console.warn('⚠️ No se pudo conectar al sistema de reacciones:', response.message);
+        }
+      } catch (error) {
+        console.error('❗ Error al conectar sistema de reacciones:', error);
+      }
+    }
   }
 
   private loadQueue(): void {

@@ -24,15 +24,28 @@ export class ReactionsService implements OnDestroy {
   private channel: any = null;
   private tenantId: string = '';
   private isConnected = false;
+  
+  // Sistema de reconexión
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private baseReconnectDelay = 1000; // 1 segundo base
+  private reconnectTimeout: any = null;
+  private isReconnecting = false;
 
   // Subjects para el estado reactivo
   private connectionSubject = new BehaviorSubject<boolean>(false);
   private statsSubject = new BehaviorSubject<ReactionStats>({
     love: 0,
-    fire: 0,
     clap: 0,
+    rock: 0,
+    mindblown: 0,
+    fire: 0,
+    guitar: 0,
+    electric: 0,
     music: 0,
-    amazing: 0,
+    loud: 0,
+    cool: 0,
+    praise: 0,
     totalComments: 0
   });
   private feedSubject = new BehaviorSubject<ReactionFeedItem[]>([]);
@@ -91,6 +104,8 @@ export class ReactionsService implements OnDestroy {
           if (status === 'SUBSCRIBED') {
             this.isConnected = true;
             this.connectionSubject.next(true);
+            this.reconnectAttempts = 0; // Reset contador de reconexiones
+            this.clearReconnectTimeout();
             console.log('✅ Canal de reacciones conectado exitosamente');
             resolve({
               success: true,
@@ -101,6 +116,10 @@ export class ReactionsService implements OnDestroy {
             this.connectionSubject.next(false);
             const errorMsg = `Error de conexión: ${status}`;
             console.error('❌', errorMsg);
+            
+            // Iniciar reconexión automática
+            this.scheduleReconnect();
+            
             reject({
               success: false,
               message: errorMsg
@@ -135,6 +154,8 @@ export class ReactionsService implements OnDestroy {
    */
   async disconnect(): Promise<void> {
     try {
+      this.clearReconnectTimeout();
+      
       if (this.channel) {
         console.log('🔌 Desconectando canal de reacciones');
         await this.supabaseService.removeChannel(this.channel);
@@ -193,10 +214,16 @@ export class ReactionsService implements OnDestroy {
   resetStats(): void {
     this.statsSubject.next({
       love: 0,
-      fire: 0,
       clap: 0,
+      rock: 0,
+      mindblown: 0,
+      fire: 0,
+      guitar: 0,
+      electric: 0,
       music: 0,
-      amazing: 0,
+      loud: 0,
+      cool: 0,
+      praise: 0,
       totalComments: 0
     });
   }
@@ -264,11 +291,11 @@ export class ReactionsService implements OnDestroy {
   }
 
   /**
-   * Agregar item al feed (mantiene máximo de 50 items)
+   * Agregar item al feed (mantiene máximo de 200 items para sesiones largas)
    */
   private addToFeed(item: ReactionFeedItem): void {
     const currentFeed = this.feedSubject.value;
-    const newFeed = [item, ...currentFeed].slice(0, 50); // Mantener últimos 50
+    const newFeed = [item, ...currentFeed].slice(0, 200); // Mantener últimos 200
     this.feedSubject.next(newFeed);
   }
 
@@ -278,10 +305,16 @@ export class ReactionsService implements OnDestroy {
   private getEmojiForReaction(type: ReactionType): string {
     const emojiMap: Record<ReactionType, string> = {
       love: '❤️',
-      fire: '🔥',
       clap: '👏',
+      rock: '🤘',
+      mindblown: '🤩',
+      fire: '🔥',
+      guitar: '🎸',
+      electric: '⚡',
       music: '🎵',
-      amazing: '😍'
+      loud: '🔊',
+      cool: '😎',
+      praise: '🙌'
     };
     return emojiMap[type] || '👍';
   }
@@ -292,10 +325,16 @@ export class ReactionsService implements OnDestroy {
   getAvailableReactions(): { type: ReactionType; emoji: string; label: string; color: string }[] {
     return [
       { type: 'love', emoji: '❤️', label: 'Amor', color: '#e91e63' },
-      { type: 'fire', emoji: '🔥', label: 'Fuego', color: '#ff5722' },
       { type: 'clap', emoji: '👏', label: 'Aplauso', color: '#4caf50' },
+      { type: 'rock', emoji: '🤘', label: 'Rock', color: '#f44336' },
+      { type: 'mindblown', emoji: '🤩', label: 'Increíble', color: '#9c27b0' },
+      { type: 'fire', emoji: '🔥', label: 'Fuego', color: '#ff5722' },
+      { type: 'guitar', emoji: '🎸', label: 'Guitarra', color: '#8e24aa' },
+      { type: 'electric', emoji: '⚡', label: 'Eléctrico', color: '#ffc107' },
       { type: 'music', emoji: '🎵', label: 'Música', color: '#2196f3' },
-      { type: 'amazing', emoji: '😍', label: 'Increíble', color: '#9c27b0' }
+      { type: 'loud', emoji: '🔊', label: 'Volumen', color: '#009688' },
+      { type: 'cool', emoji: '😎', label: 'Cool', color: '#3f51b5' },
+      { type: 'praise', emoji: '🙌', label: 'Alabanza', color: '#00bcd4' }
     ];
   }
 
@@ -303,9 +342,71 @@ export class ReactionsService implements OnDestroy {
    * Cleanup al destruir el servicio
    */
   ngOnDestroy(): void {
+    this.clearReconnectTimeout();
     this.disconnect();
     this.connectionSubject.complete();
     this.statsSubject.complete();
     this.feedSubject.complete();
+  }
+
+  /**
+   * Programar reconexión automática con backoff exponencial
+   */
+  private scheduleReconnect(): void {
+    if (this.isReconnecting || this.reconnectAttempts >= this.maxReconnectAttempts) {
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        console.error('🚫 Se agotaron los intentos de reconexión');
+      }
+      return;
+    }
+
+    this.isReconnecting = true;
+    this.reconnectAttempts++;
+    
+    // Backoff exponencial: 1s, 2s, 4s, 8s, 16s
+    const delay = this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+    
+    console.log(`🔄 Programando reconexión ${this.reconnectAttempts}/${this.maxReconnectAttempts} en ${delay}ms`);
+    
+    this.reconnectTimeout = setTimeout(async () => {
+      try {
+        console.log(`🔄 Intentando reconectar (intento ${this.reconnectAttempts})...`);
+        await this.connect(this.tenantId);
+        this.isReconnecting = false;
+      } catch (error) {
+        console.error(`❌ Fallo en reconexión ${this.reconnectAttempts}:`, error);
+        this.isReconnecting = false;
+        this.scheduleReconnect(); // Intentar de nuevo
+      }
+    }, delay);
+  }
+
+  /**
+   * Limpiar timeout de reconexión
+   */
+  private clearReconnectTimeout(): void {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+      this.isReconnecting = false;
+    }
+  }
+
+  /**
+   * Forzar reconexión manual
+   */
+  async forceReconnect(): Promise<ReactionResponse> {
+    console.log('🔄 Forzando reconexión manual...');
+    this.reconnectAttempts = 0;
+    this.clearReconnectTimeout();
+    
+    if (this.tenantId) {
+      return await this.connect(this.tenantId);
+    } else {
+      return {
+        success: false,
+        message: 'No hay tenantId configurado para reconectar'
+      };
+    }
   }
 }

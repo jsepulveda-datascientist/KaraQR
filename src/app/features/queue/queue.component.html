@@ -155,7 +155,19 @@
   <!-- Footer Compacto -->
   <footer class="queue-footer">
     <div class="footer-content">
-      <span class="powered-by">Powered by KaraQR</span>
+      <div class="footer-left">
+        <span class="powered-by">Powered by KaraQR</span>
+      </div>
+      <div class="footer-right">
+        <!-- Indicador de conexión de reacciones -->
+        <i class="pi connection-icon" 
+           [class.pi-wifi]="isReactionsConnected$ | async" 
+           [class.pi-wifi-off]="!(isReactionsConnected$ | async)"
+           [class.connected]="isReactionsConnected$ | async"
+           [class.disconnected]="!(isReactionsConnected$ | async)"
+           [title]="(isReactionsConnected$ | async) ? 'Reacciones activas' : 'Sin reacciones'">
+        </i>
+      </div>
     </div>
   </footer>
 
