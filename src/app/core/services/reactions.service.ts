@@ -31,6 +31,13 @@ export class ReactionsService implements OnDestroy {
   private baseReconnectDelay = 1000; // 1 segundo base
   private reconnectTimeout: any = null;
   private isReconnecting = false;
+  
+  // Límites de rate para evitar spam
+  private lastConnectionAttempt = 0;
+  private minConnectionInterval = 5000; // 5 segundos mínimo entre reconexiones
+  
+  // Control de estado
+  private isDisconnecting = false;
 
   // Subjects para el estado reactivo
   private connectionSubject = new BehaviorSubject<boolean>(false);
@@ -64,23 +71,41 @@ export class ReactionsService implements OnDestroy {
    */
   async connect(tenantId: string): Promise<ReactionResponse> {
     try {
+      // Control de rate limiting
+      const now = Date.now();
+      if (now - this.lastConnectionAttempt < this.minConnectionInterval) {
+        const waitTime = this.minConnectionInterval - (now - this.lastConnectionAttempt);
+        console.warn(`⏱️ Rate limit: esperando ${waitTime}ms antes de reconectar`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+      this.lastConnectionAttempt = Date.now();
+      
       this.tenantId = tenantId;
       console.log('🔗 ReactionsService conectando al tenant:', tenantId);
 
-      // Desconectar canal anterior si existe
-      if (this.channel) {
-        await this.disconnect();
+      // Desconectar canal anterior si existe (con timeout)
+      if (this.channel && !this.isDisconnecting) {
+        await Promise.race([
+          this.disconnect(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout en disconnect')), 5000))
+        ]);
       }
 
-      // Crear canal específico para el tenant (mismo formato que Vue)
+      // Crear canal específico para el tenant con configuración optimizada
       const channelName = `reactions_${tenantId}`;
       console.log('🔗 Creando canal:', channelName);
 
       this.channel = this.supabaseService.channel(channelName, {
         config: {
           broadcast: {
-            self: true, // Recibir confirmaciones
-            ack: true   // Habilitar acknowledgments
+            self: false, // ❌ CAMBIO CRÍTICO: false para evitar loops
+            ack: false   // ❌ Deshabilitar para reducir overhead
+          },
+          presence: {
+            key: 'presence'
+          },
+          postgres_changes: {
+            enabled: false  // ❌ Deshabilitar para reducir carga
           }
         }
       });
@@ -94,14 +119,35 @@ export class ReactionsService implements OnDestroy {
         .on('broadcast', { event: 'comment' }, (payload: any) => {
           console.log('📢 Comentario recibido:', payload);
           this.handleIncomingComment(payload);
+        })
+        .on('broadcast', { event: 'heartbeat' }, () => {
+          // Heartbeat silencioso
         });
 
-      // Suscribirse al canal con Promise para manejar estados
+      // Suscribirse al canal con timeout más robusto
       return new Promise((resolve, reject) => {
+        let isResolved = false;
+        
+        // Timeout extendido para conexiones lentas (45 segundos)
+        const timeout = setTimeout(() => {
+          if (!isResolved) {
+            isResolved = true;
+            this.isConnected = false;
+            this.connectionSubject.next(false);
+            console.error('⏰ Timeout: No se pudo conectar al canal en 45 segundos');
+            reject({
+              success: false,
+              message: 'Timeout de conexión extendido - red lenta detectada'
+            });
+          }
+        }, 45000);
+        
         this.channel.subscribe((status: string) => {
           console.log('🔗 Estado del canal de reacciones:', status);
 
-          if (status === 'SUBSCRIBED') {
+          if (status === 'SUBSCRIBED' && !isResolved) {
+            isResolved = true;
+            clearTimeout(timeout);
             this.isConnected = true;
             this.connectionSubject.next(true);
             this.reconnectAttempts = 0; // Reset contador de reconexiones
@@ -111,37 +157,50 @@ export class ReactionsService implements OnDestroy {
               success: true,
               message: 'Conectado al sistema de reacciones'
             });
-          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          } else if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && !isResolved) {
+            isResolved = true;
+            clearTimeout(timeout);
             this.isConnected = false;
             this.connectionSubject.next(false);
             const errorMsg = `Error de conexión: ${status}`;
             console.error('❌', errorMsg);
             
-            // Iniciar reconexión automática
-            this.scheduleReconnect();
+            // Para TIMED_OUT, intentar reconexión inmediata si es el primer intento
+            if (status === 'TIMED_OUT' && this.reconnectAttempts === 0) {
+              console.log('🔄 TIMEOUT detectado, programando reconexión inmediata...');
+              setTimeout(() => {
+                if (!this.isDisconnecting) {
+                  this.scheduleReconnect();
+                }
+              }, 2000);
+            }
             
             reject({
               success: false,
               message: errorMsg
             });
+          } else if (status === 'CLOSED') {
+            this.isConnected = false;
+            this.connectionSubject.next(false);
+            console.warn(`❌ Error de conexión: ${status}`);
+            // Solo programar reconexión si no estamos desconectando intencionalmente
+            if (!this.isDisconnecting) {
+              this.scheduleReconnect();
+            }
           }
         });
-
-        // Timeout de seguridad
-        setTimeout(() => {
-          if (!this.isConnected) {
-            reject({
-              success: false,
-              message: 'Timeout: No se pudo conectar en 10 segundos'
-            });
-          }
-        }, 10000);
       });
 
     } catch (error) {
       console.error('💥 Error al conectar ReactionsService:', error);
       this.isConnected = false;
       this.connectionSubject.next(false);
+      
+      // Solo programar reconexión si hay tenantId válido y no estamos desconectando
+      if (this.tenantId && !this.isDisconnecting) {
+        this.scheduleReconnect();
+      }
+      
       return {
         success: false,
         message: `Error de conexión: ${error}`
@@ -154,18 +213,33 @@ export class ReactionsService implements OnDestroy {
    */
   async disconnect(): Promise<void> {
     try {
+      this.isDisconnecting = true;
       this.clearReconnectTimeout();
       
       if (this.channel) {
         console.log('🔌 Desconectando canal de reacciones');
-        await this.supabaseService.removeChannel(this.channel);
+        
+        try {
+          await Promise.race([
+            this.supabaseService.removeChannel(this.channel),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout en disconnect')), 10000)
+            )
+          ]);
+          console.log('✅ Canal desconectado');
+        } catch (unsubError) {
+          console.warn('⚠️ Error al desconectar canal:', unsubError);
+          // Forzar limpieza aún con errores
+        }
+        
         this.channel = null;
         this.isConnected = false;
         this.connectionSubject.next(false);
-        console.log('✅ Canal desconectado');
       }
     } catch (error) {
       console.error('❌ Error al desconectar:', error);
+    } finally {
+      this.isDisconnecting = false;
     }
   }
 
@@ -353,30 +427,54 @@ export class ReactionsService implements OnDestroy {
    * Programar reconexión automática con backoff exponencial
    */
   private scheduleReconnect(): void {
-    if (this.isReconnecting || this.reconnectAttempts >= this.maxReconnectAttempts) {
-      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.error('🚫 Se agotaron los intentos de reconexión');
-      }
+    // No reconectar si estamos desconectando intencionalmente
+    if (this.isDisconnecting) {
+      console.info('🚫 No se programa reconexión: desconexión intencional');
+      return;
+    }
+    
+    // No reconectar si ya se agotaron los intentos
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('🚫 Se agotaron los intentos de reconexión');
+      return;
+    }
+    
+    // No reconectar si ya hay una reconexión en progreso
+    if (this.isReconnecting) {
+      console.warn('🔄 Ya hay una reconexión en progreso, saltando...');
       return;
     }
 
     this.isReconnecting = true;
     this.reconnectAttempts++;
     
-    // Backoff exponencial: 1s, 2s, 4s, 8s, 16s
-    const delay = this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+    // Backoff exponencial con jitter: 1s, 2s, 4s, 8s, 16s
+    const baseDelay = this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+    // Agregar jitter para evitar thundering herd
+    const jitter = Math.random() * 1000;
+    const delay = Math.min(baseDelay + jitter, 30000); // Máximo 30 segundos
     
-    console.log(`🔄 Programando reconexión ${this.reconnectAttempts}/${this.maxReconnectAttempts} en ${delay}ms`);
+    console.log(`🔄 Programando reconexión ${this.reconnectAttempts}/${this.maxReconnectAttempts} en ${Math.round(delay)}ms`);
     
     this.reconnectTimeout = setTimeout(async () => {
       try {
         console.log(`🔄 Intentando reconectar (intento ${this.reconnectAttempts})...`);
         await this.connect(this.tenantId);
         this.isReconnecting = false;
+        console.log('✅ Reconexión exitosa');
       } catch (error) {
-        console.error(`❌ Fallo en reconexión ${this.reconnectAttempts}:`, error);
+        console.error(`❌ Fallo en reconexión ${this.reconnectAttempts}:`, { 
+          success: false, 
+          message: `Error de conexión: ${error}` 
+        });
         this.isReconnecting = false;
-        this.scheduleReconnect(); // Intentar de nuevo
+        
+        // Solo continuar reconectando si no hemos alcanzado el límite
+        if (this.reconnectAttempts < this.maxReconnectAttempts && !this.isDisconnecting) {
+          this.scheduleReconnect();
+        } else if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+          console.error('🚫 Límite de reconexiones alcanzado. Deteniendo intentos.');
+        }
       }
     }, delay);
   }
