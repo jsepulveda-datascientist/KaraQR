@@ -1,6 +1,6 @@
 # Redirección de /join a karaQR-singer app
-/join/:tenant  https://karaqr-singer.pages.dev/?tenant=:tenant  302
-/join  https://karaqr-singer.pages.dev/  302
+# Netlify preserva automáticamente los query parameters
+/join  https://karaqr-singer.pages.dev/  302!
 
 # SPA fallback
 /*    /index.html   200
