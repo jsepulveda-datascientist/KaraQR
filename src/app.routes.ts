@@ -68,6 +68,10 @@ export const appRoutes: Routes = [
         loadComponent: () => import('@/features/queue/queue.component').then((c) => c.QueueComponent)
     },
     {
+        path: 'join',
+        loadComponent: () => import('@/features/join-redirect/join-redirect.component').then((c) => c.JoinRedirectComponent)
+    },
+    {
         path: 'remote',  // Renamed from 'admin'
         loadComponent: () => import('@/features/admin/admin.component').then((c) => c.AdminComponent)
     },
