@@ -44,7 +44,7 @@ export class JoinRedirectComponent implements OnInit {
       console.log('🔗 JoinRedirect: Tenant detectado:', this.tenantId);
       
       // Construir URL de redirección
-      const baseUrl = 'https://karaqr-singer.pages.dev/';
+      const baseUrl = 'https://karaqr-singer.pages.dev/login';
       const redirectUrl = this.tenantId 
         ? `${baseUrl}?tenant=${this.tenantId}`
         : baseUrl;
